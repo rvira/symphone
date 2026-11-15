@@ -413,7 +413,7 @@ export default function Orchestra() {
           symphone<span className="brand-period">.</span>
         </a>
         <div className="header-caption">
-          A LITTLE IMPULSE. A WHOLE ORCHESTRA.
+          THE ORCHESTRA STUDIO<span>Acoustic / Electronic</span>
         </div>
         <div className="header-actions">
           <span className="local-label">
@@ -442,27 +442,31 @@ export default function Orchestra() {
           <div className="hero-copy">
             <div className="eyebrow">
               <span className="tiny-line" />
-              YOUR OWN HYBRID ORCHESTRA
+              STUDIO 01 / THE CONDUCTOR’S DESK
             </div>
             <h1>
-              Find your next
-              <br />
-              <em>movement.</em>
-              <span className="title-star">✳</span>
+              At the <em>podium.</em>
             </h1>
             <p>
-              Strings, synths, and something only you could make.
-              <br className="desktop-break" />
-              Play a few notes. Let the ensemble follow.
+              An orchestra, ready for your ideas. Choose a section,
+              <br className="desktop-break" /> play a phrase, and hear it find
+              its place.
             </p>
+            <div className="movement-program">
+              <span className="program-number">I.</span>
+              <div>
+                <span>NOW ON THE MUSIC STAND</span>
+                <strong>{scene.name}</strong>
+                <small>
+                  {scene.mode} · {score.bpm} beats per minute · 8 bars
+                </small>
+              </div>
+            </div>
           </div>
           <div className="hero-stage">
             <div className="stage-topline">
-              <span>ENSEMBLE NO. 01</span>
-              <span>
-                8 SECTIONS <span className="mini-cross">+</span> ENDLESS
-                POSSIBILITIES
-              </span>
+              <span>THE STAGE</span>
+              <span>Click a section to take your seat</span>
             </div>
             <Ensemble
               playing={playing}
@@ -579,9 +583,9 @@ export default function Orchestra() {
           >
             <div className="panel-heading">
               <div>
-                <div className="eyebrow">THE WHOLE, IN HARMONY</div>
+                <div className="eyebrow">THE WORKING SCORE</div>
                 <h2 id="arrangement-heading">
-                  Your ensemble<span className="section-count">08</span>
+                  Full orchestra<span className="section-count">08</span>
                 </h2>
               </div>
               <span className="bar-readout">
@@ -705,7 +709,7 @@ export default function Orchestra() {
               <span className="evolve-note">
                 {evolving
                   ? "One section evolves every 2 bars"
-                  : "An eight-bar idea. Yours to shape."}
+                  : "Eight bars · Repeating movement"}
               </span>
             </div>
             <div className="mix-controls">
@@ -924,7 +928,7 @@ export default function Orchestra() {
         <footer className="site-footer">
           <span className="footer-note">
             <Music2 size={14} />
-            No theory required. Just curiosity.
+            Space to play / A–K for your instrument
           </span>
           <span className={`audio-status ${loading ? "loading" : ""}`}>
             <i />
@@ -936,9 +940,7 @@ export default function Orchestra() {
                   ? `${readyCount}/6 sampled · synth fallback active`
                   : "Sound begins with your first note"}
           </span>
-          <span>
-            MADE FOR THE MOMENT<span className="footer-star">✳</span>
-          </span>
+          <span>SYMPHONE / STUDIO 01</span>
         </footer>
       </main>
 

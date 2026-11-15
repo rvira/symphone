@@ -1,0 +1,15 @@
+# Symphone studio design
+
+The interface draws on a working music studio and the physical experience of a concert hall: an oak stage, ivory score paper, black music stands, restrained brass details, and muted section colors. The score and instrument remain the primary controls; the stage provides musical context.
+
+## References
+
+- [Philharmonie Berlin: audience and stage](https://www.berliner-philharmoniker.de/en/stories/why-is-the-audience-seated-behind-the-orchestra/): the ensemble as the spatial and visual center, with a curved arrangement around the conductor.
+- [Philharmonie Luxembourg: first visit](https://www.philharmonie.lu/en/visit-us/my-first-visit): the evening programme and the transition into a concert space informed the small movement programme alongside the stage.
+- [London Symphony Orchestra: How to Build an Orchestra](https://www.lso.co.uk/learn-and-discover/digital-activities-and-resources/how-to-build-an-orchestra/): clear instrument families, orchestral pictograms and the conductor's relationship to the players.
+
+These are design references, not affiliations. No third-party photographs, logos or artwork are embedded. The seating illustration and stage geometry are original code. The hybrid electronic positions are a product choice, not a claim to reproduce a specific orchestra's seating.
+
+## Palette
+
+Warm paper and charcoal form the neutral surfaces. Strings use sage, woodwinds slate blue, horns antique brass, percussion terracotta, harp dusty rose, and electronic parts muted blue and violet. Color identifies an instrument family rather than decorating every surface.
