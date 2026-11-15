@@ -1,7 +1,10 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import "./globals.css";
+import Orchestra from "../components/Orchestra";
 
 createRoot(document.getElementById("root")!).render(
-  <React.StrictMode><main>Tutti · project scaffold</main></React.StrictMode>,
+  <React.StrictMode>
+    <Orchestra />
+  </React.StrictMode>,
 );
