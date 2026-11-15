@@ -2,7 +2,9 @@ import type { Soundfont } from "smplr";
 import {
   evolve,
   INSTRUMENTS,
-  TOTAL_STEPS,
+  stepsPerBar,
+  totalSteps,
+  secondsPerStep,
   type InstrumentId,
   type Score,
 } from "./score";
@@ -17,7 +19,8 @@ export type PlaybackEvent = {
   drop?: boolean;
 };
 export type SampleStatus = "not-loaded" | "loading" | "ready" | "fallback";
-export const crescendoLength = (step: number) => 16 - (step % 16) + 16;
+export const crescendoLength = (step: number, barLength = 16) =>
+  barLength - (step % barLength) + barLength;
 
 class OrchestraEngine {
   private context: AudioContext | null = null;
@@ -169,10 +172,26 @@ class OrchestraEngine {
   }
 
   setScore(score: Score) {
+    if (
+      this.score &&
+      (this.score.scene !== score.scene || this.score.seed !== score.seed)
+    ) {
+      // A new movement starts on its own downbeat, including when meter changes.
+      this.absoluteStep = 0;
+      this.build = null;
+      this.events = [];
+      for (const release of [...this.releases]) release();
+      this.samples.forEach((sample) => sample.stop());
+      if (this.context) {
+        this.nextTime = this.context.currentTime + 0.06;
+        this.highpass.frequency.cancelScheduledValues(this.context.currentTime);
+        this.highpass.frequency.setValueAtTime(25, this.context.currentTime);
+      }
+    }
     this.score = score;
     for (const inst of INSTRUMENTS) {
       const steps = Array.from(
-        { length: TOTAL_STEPS },
+        { length: totalSteps(score) },
         () => [] as Score["parts"][InstrumentId]["notes"],
       );
       score.parts[inst.id].notes.forEach((note) =>
@@ -245,14 +264,14 @@ class OrchestraEngine {
         this.autoEvolve &&
         !this.build &&
         this.absoluteStep > 0 &&
-        this.absoluteStep % 32 === 0
+        this.absoluteStep % (stepsPerBar(this.score!) * 2) === 0
       ) {
         updated = evolve(this.score!);
         this.setScore(updated);
       }
       const score = this.score!,
-        step = this.absoluteStep % TOTAL_STEPS;
-      const seconds = 60 / score.bpm / 4;
+        step = this.absoluteStep % totalSteps(score);
+      const seconds = secondsPerStep(score);
       const progress = this.build
         ? 1 - this.build.remaining / this.build.total
         : 0;
@@ -311,8 +330,8 @@ class OrchestraEngine {
   crescendo() {
     if (!this.playing || this.build || !this.context || !this.score)
       return false;
-    const total = crescendoLength(this.absoluteStep),
-      duration = (total * 60) / this.score.bpm / 4;
+    const total = crescendoLength(this.absoluteStep, stepsPerBar(this.score)),
+      duration = total * secondsPerStep(this.score);
     this.build = { remaining: total, total };
     const now = this.context.currentTime;
     this.highpass.frequency.cancelScheduledValues(now);

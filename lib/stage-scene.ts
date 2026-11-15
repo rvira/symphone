@@ -1,5 +1,11 @@
 import * as THREE from "three";
-import { INSTRUMENTS, type InstrumentId, type Score } from "./score";
+import {
+  INSTRUMENTS,
+  sceneFor,
+  secondsPerStep,
+  type InstrumentId,
+  type Score,
+} from "./score";
 import { STAGE_SECTIONS, playerPositions, sectionActivity } from "./stage";
 
 export type StageState = {
@@ -661,10 +667,10 @@ export function createStage(
     }
     const stepFraction = Math.min(
       1,
-      (now - stepTime) / (60000 / s.score.bpm / 4),
+      (now - stepTime) / (secondsPerStep(s.score) * 1000),
     );
     const beat = s.playing
-      ? Math.max(0, s.step + stepFraction) / 4
+      ? Math.max(0, s.step + stepFraction) / sceneFor(s.score.scene).beatSteps
       : (now * s.score.bpm) / 60000;
     pointer.lerp(s.motion ? targetPointer : zeroPointer, 0.045);
     camera.position.set(

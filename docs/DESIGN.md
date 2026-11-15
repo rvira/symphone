@@ -10,6 +10,15 @@ The interface draws on a working music studio and the physical experience of a c
 
 These are design references, not affiliations. No third-party photographs, logos or artwork are embedded. The seating illustration and stage geometry are original code. The hybrid electronic positions are a product choice, not a claim to reproduce a specific orchestra's seating.
 
+## Musical scenes
+
+The scene library borrows KHAOS's broad idea of genre-specific composition, not its source or melodies. Each scene specifies a scale, eight-bar harmony, meter, tempo, melodic rhythm and section balance. New styles also change the accompanying bass, harp, horn voicing and flute responses. Folk and classical scenes retain a little electronic color without making it the rhythmic center.
+
+- [The Frederick Ashton Foundation: biography](https://www.frederickashton.org.uk/about/biography/) informed the poised, light-touch British ballet direction. The generated 3/4 scene is one ballet-inspired musical choice, not a claim that British ballet always uses waltz time.
+- [English Folk Dance and Song Society: types of tunes](https://www.efdss.org/learning/resources/beginners-guides/51-english-folk-music/2480-efdss-types-of-tunes) and [jigs](https://www.efdss.org/learning/resources/beginners-guides/51-english-folk-music/2481-efdss-tune-example-jigs) informed the distinction between a running reel, a lilting jig and a three-beat dance.
+
+All melodies are newly generated. Scene names describe influences; these are simplified hybrid-orchestra interpretations, not historically authentic performance models. No folk recordings, published arrangements or ballet scores were copied. The restrained scene cards use small color markers and programme-note descriptions rather than photographic backdrops.
+
 ## Palette
 
 Warm paper and charcoal form the neutral surfaces. Strings use sage, woodwinds slate blue, horns antique brass, percussion terracotta, harp dusty rose, and electronic parts muted blue and violet. Color identifies an instrument family rather than decorating every surface.

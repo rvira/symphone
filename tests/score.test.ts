@@ -4,7 +4,10 @@ import {
   INSTRUMENTS,
   MAX_LAYERS,
   SCENES,
-  TOTAL_STEPS,
+  BARS,
+  stepsPerBar,
+  totalSteps,
+  secondsPerStep,
   compose,
   evolve,
   padNotes,
@@ -22,9 +25,10 @@ test("all scenes produce deterministic, bounded, in-key eight-bar scores", () =>
       for (const instrument of INSTRUMENTS) {
         assert.ok(score.parts[instrument.id].notes.length > 0);
         for (const note of score.parts[instrument.id].notes) {
-          assert.ok(note.step >= 0 && note.step < TOTAL_STEPS);
+          assert.ok(Number.isInteger(note.step));
+          assert.ok(note.step >= 0 && note.step < totalSteps(score));
           assert.ok(
-            note.duration > 0 && note.step + note.duration <= TOTAL_STEPS,
+            note.duration > 0 && note.step + note.duration <= totalSteps(score),
           );
           assert.ok(note.velocity > 0 && note.velocity <= 1);
           assert.ok(note.midi >= 0 && note.midi <= 127);
@@ -124,9 +128,106 @@ test("every section can vary across seeds", () => {
 });
 
 test("crescendo always spans to the next bar plus a complete bar", () => {
-  for (let step = 0; step < TOTAL_STEPS; step++) {
-    const duration = crescendoLength(step);
-    assert.ok(duration >= 17 && duration <= 32);
-    assert.equal((step + duration) % 16, 0);
+  for (const scene of SCENES) {
+    const score = compose(scene.id, 1),
+      bar = stepsPerBar(score);
+    for (let step = 0; step < totalSteps(score); step++) {
+      const duration = crescendoLength(step, bar);
+      assert.ok(duration >= bar + 1 && duration <= bar * 2);
+      assert.equal((step + duration) % bar, 0);
+    }
   }
+});
+
+test("the scene library has unique styles and valid musical metadata", () => {
+  assert.equal(SCENES.length, 12);
+  assert.equal(new Set(SCENES.map((s) => s.id)).size, SCENES.length);
+  for (const scene of SCENES) {
+    assert.equal(scene.progression.length, BARS);
+    assert.equal(scene.scale.length, 7);
+    assert.ok(scene.bpm >= 50 && scene.bpm <= 160);
+    assert.ok(scene.description.length > 40);
+    assert.equal(scene.stepsPerBar, scene.meter === "4/4" ? 16 : 12);
+    for (const level of Object.values(scene.mix ?? {}))
+      assert.ok(level >= 0 && level <= 1);
+  }
+});
+
+test("waltzes and jigs use the same subdivisions but different beat groupings", () => {
+  const ballet = compose("ballet", 1),
+    jig = compose("jig", 1);
+  ballet.bpm = jig.bpm = 90;
+  assert.equal(totalSteps(ballet), 96);
+  assert.equal(totalSteps(jig), 96);
+  assert.equal(stepsPerBar(ballet) * secondsPerStep(ballet), (3 * 60) / 90);
+  assert.equal(stepsPerBar(jig) * secondsPerStep(jig), (2 * 60) / 90);
+  assert.equal(totalSteps(compose("horizon", 1)), 128);
+});
+
+test("every meter quantizes and repeats a captured two-bar phrase without overflowing", () => {
+  for (const scene of SCENES) {
+    const score = compose(scene.id, 6),
+      phrase = stepsPerBar(score) * 2;
+    const ms = secondsPerStep(score) * 1000;
+    const woven = weave(score, "strings", [
+      { midi: 72, time: 1000 },
+      { midi: 76, time: 1000 + ms * 5 },
+      { midi: 79, time: 1000 + ms * (phrase - 1) },
+      { midi: 81, time: 1000 + ms * phrase }, // Outside the capture window.
+    ]);
+    assert.deepEqual(
+      woven.parts.strings.notes.map((n) => n.step),
+      Array.from({ length: 4 }, (_, i) =>
+        [0, 5, phrase - 1].map((st) => st + i * phrase),
+      ).flat(),
+    );
+    assert.equal(
+      woven.parts.strings.notes.at(-1)!.step +
+        woven.parts.strings.notes.at(-1)!.duration,
+      totalSteps(score),
+    );
+    assert.deepEqual(
+      undoLayer(woven, "strings").parts.strings.notes,
+      score.parts.strings.notes,
+    );
+    assert.deepEqual(evolve(woven).parts.strings, woven.parts.strings);
+    assert.deepEqual(
+      reorchestrate(woven, 1).parts.strings,
+      woven.parts.strings,
+    );
+  }
+});
+
+test("new scenes change orchestration, rhythm and mix rather than only the key", () => {
+  const profiles = new Set(
+    SCENES.map((scene) => {
+      const score = compose(scene.id, 314);
+      return JSON.stringify(
+        INSTRUMENTS.map((inst) => ({
+          volume: score.parts[inst.id].volume,
+          rhythm: score.parts[inst.id].notes
+            .filter((n) => n.step < scene.stepsPerBar)
+            .map((n) => [n.step, n.duration]),
+        })),
+      );
+    }),
+  );
+  assert.equal(profiles.size, SCENES.length);
+  const ballet = compose("ballet", 314);
+  assert.deepEqual(
+    [
+      ...new Set(
+        ballet.parts.harp.notes.filter((n) => n.step < 12).map((n) => n.step),
+      ),
+    ],
+    [4, 8],
+  );
+  const jig = compose("jig", 314);
+  assert.deepEqual(
+    jig.parts.strings.notes.filter((n) => n.step < 12).map((n) => n.step),
+    [0, 2, 4, 6, 8, 10],
+  );
+  assert.ok(
+    jig.parts.pulse.volume < compose("momentum", 314).parts.pulse.volume,
+  );
 });

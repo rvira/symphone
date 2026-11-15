@@ -15,7 +15,6 @@ import {
   Music2,
   Play,
   RotateCcw,
-  Shuffle,
   Sparkles,
   Square,
   Volume2,
@@ -29,7 +28,8 @@ import {
   INSTRUMENTS,
   MAX_LAYERS,
   SCENES,
-  TOTAL_STEPS,
+  stepsPerBar,
+  totalSteps,
   compose,
   instrumentFor,
   noteName,
@@ -45,6 +45,7 @@ import {
 } from "../lib/score";
 import InstrumentGlyph from "./InstrumentGlyph";
 import Ensemble from "./Ensemble";
+import SceneLibrary from "./SceneLibrary";
 
 const KEYS = ["a", "s", "d", "f", "g", "h", "j", "k"];
 const STORAGE_KEY = "symphone.score.v1";
@@ -84,11 +85,11 @@ function initialScore(): Score {
             }) =>
               Number.isInteger(n.step) &&
               n.step >= 0 &&
-              n.step < TOTAL_STEPS &&
+              n.step < totalSteps(stored) &&
               n.midi >= 0 &&
               n.midi <= 127 &&
               n.duration > 0 &&
-              n.duration <= TOTAL_STEPS &&
+              n.step + n.duration <= totalSteps(stored) &&
               n.velocity >= 0 &&
               n.velocity <= 1,
           )
@@ -256,6 +257,9 @@ export default function Orchestra() {
     (sceneId?: SceneId) => {
       releaseAll();
       setCaptured([]);
+      setBuilding(false);
+      setProgress(0);
+      setStep(0);
       setSolo(null);
       orchestra.setSolo(null);
       const next = compose(
@@ -511,13 +515,21 @@ export default function Orchestra() {
                   });
               }}
             />
-            <span>BPM</span>
+            <span
+              title={
+                scene.meter === "6/8"
+                  ? "BPM counts dotted-quarter beats: two beats per bar"
+                  : "BPM counts quarter-note beats"
+              }
+            >
+              BPM{scene.meter === "6/8" ? " · ♩." : ""}
+            </span>
           </div>
           <span className="transport-divider" />
           <div className="key-signature">
             <Music2 size={15} />
             {scene.mode}
-            <span>4/4</span>
+            <span>{scene.meter}</span>
           </div>
           <div className="transport-spacer" />
           <button
@@ -554,31 +566,11 @@ export default function Orchestra() {
           </button>
         </section>
 
-        <section className="scene-bar" aria-label="Movement selection">
-          <div className="scene-label">
-            SET THE SCENE <ArrowRight size={13} />
-          </div>
-          <div className="scenes">
-            {SCENES.map((s) => (
-              <button
-                key={s.id}
-                className={`scene-button ${s.id === score.scene ? "selected" : ""}`}
-                onClick={() => {
-                  if (s.id !== score.scene) newMovement(s.id);
-                }}
-                aria-pressed={s.id === score.scene}
-              >
-                <span className={`scene-dot ${s.id}`} />
-                <span>{s.name}</span>
-                <small>{s.subtitle}</small>
-              </button>
-            ))}
-          </div>
-          <button className="new-movement" onClick={() => newMovement()}>
-            <Shuffle size={15} />
-            <span>New movement</span>
-          </button>
-        </section>
+        <SceneLibrary
+          selected={score.scene}
+          onChoose={newMovement}
+          onNew={() => newMovement()}
+        />
 
         <div className="workspace">
           <section
@@ -595,7 +587,7 @@ export default function Orchestra() {
               <span className="bar-readout">
                 <span className={`status-light ${playing ? "live" : ""}`} />
                 {playing
-                  ? `BAR ${Math.floor(step < 0 ? 0 : step / 16) + 1} / ${BARS}`
+                  ? `BAR ${Math.floor(step < 0 ? 0 : step / stepsPerBar(score)) + 1} / ${BARS}`
                   : "READY WHEN YOU ARE"}
               </span>
             </div>
@@ -611,7 +603,9 @@ export default function Orchestra() {
                     <span
                       key={i}
                       className={
-                        playing && Math.floor(step / 16) === i ? "current" : ""
+                        playing && Math.floor(step / stepsPerBar(score)) === i
+                          ? "current"
+                          : ""
                       }
                     >
                       {String(i + 1).padStart(2, "0")}
@@ -665,8 +659,8 @@ export default function Orchestra() {
                               : ""
                           }
                           style={{
-                            left: `${(note.step / TOTAL_STEPS) * 100}%`,
-                            width: `${Math.max(0.3, (note.duration / TOTAL_STEPS) * 100)}%`,
+                            left: `${(note.step / totalSteps(score)) * 100}%`,
+                            width: `${Math.max(0.3, (note.duration / totalSteps(score)) * 100)}%`,
                             top: `${8 + (1 - (note.midi - min) / Math.max(1, max - min)) * 65}%`,
                             opacity: note.layer
                               ? 0.95
@@ -696,7 +690,7 @@ export default function Orchestra() {
                 <span className="playhead-track" aria-hidden="true">
                   <span
                     className="playhead"
-                    style={{ left: `${(step / TOTAL_STEPS) * 100}%` }}
+                    style={{ left: `${(step / totalSteps(score)) * 100}%` }}
                   />
                 </span>
               )}
