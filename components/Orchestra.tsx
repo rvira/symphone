@@ -46,6 +46,8 @@ import {
 import InstrumentGlyph from "./InstrumentGlyph";
 import Ensemble from "./Ensemble";
 import SceneLibrary from "./SceneLibrary";
+import GuidedTour from "./GuidedTour";
+import { browserTourStorage, shouldOfferTour } from "../lib/tour";
 
 const KEYS = ["a", "s", "d", "f", "g", "h", "j", "k"];
 const STORAGE_KEY = "symphone.score.v1";
@@ -123,6 +125,8 @@ export default function Orchestra() {
   const [statuses, setStatuses] = useState(orchestra.sampleStatus);
   const [notice, setNotice] = useState("");
   const [help, setHelp] = useState(false);
+  const [tourFirstVisit] = useState(() => shouldOfferTour(browserTourStorage()));
+  const [tourRun, setTourRun] = useState(0);
   const [drop, setDrop] = useState(0);
   const held = useRef(
     new Map<string, { release?: () => void; released: boolean }>(),
@@ -304,6 +308,8 @@ export default function Orchestra() {
       )
         return;
       if (e.code === "Space") {
+        // Let focused buttons/links keep their native keyboard activation.
+        if (e.target instanceof HTMLElement && e.target.closest("button, a")) return;
         e.preventDefault();
         if (!e.repeat) void togglePlay();
         return;
@@ -954,6 +960,8 @@ export default function Orchestra() {
         </div>
       )}
       {drop > 0 && <div key={drop} className="drop-flash" aria-hidden="true" />}
+
+      <GuidedTour firstVisit={tourFirstVisit} run={tourRun} />
       {help && (
         <div className="modal-backdrop" onClick={() => setHelp(false)}>
           <div
@@ -988,6 +996,15 @@ export default function Orchestra() {
             </button>
             <span className="eyebrow">A SMALL GUIDE TO A BIG SOUND</span>
             <h2 id="help-title">You’re the conductor.</h2>
+            <button
+              className="tour-restart"
+              onClick={() => {
+                setHelp(false);
+                setTourRun((run) => run + 1);
+              }}
+            >
+              <HelpCircle size={16} /> Take the guided tour
+            </button>
             <ol>
               <li>
                 <strong>Start a movement.</strong> Press Play or Space. Choose a
