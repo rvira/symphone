@@ -1,7 +1,7 @@
-# Tutti
+# Symphone
 
 A playable hybrid orchestra: acoustic instrument sections meet electronic textures.
-Tutti is the musical direction for everyone in an ensemble to play together.
+Symphone brings acoustic sections and electronic textures into one playable ensemble.
 
 ## Run it
 
@@ -65,4 +65,6 @@ The composer shares one harmonic progression across the ensemble, then gives eac
 
 The first commit, `87ad296`, contains **only the repository scaffold and folder layout**. The playable implementation is a separate later commit. This is a new local Git repository on `main`; no remote has been created or configured.
 
-KHAOS informed the broad interaction pattern: a safe musical scale, generative accompaniment, evolving parts and a build/release gesture. No KHAOS source files were copied. Tutti has its own score model, orchestration algorithms, timed phrase capture, audio engine and interface. The shared third-party audio dependency is `smplr`.
+KHAOS informed the broad interaction pattern: a safe musical scale, generative accompaniment, evolving parts and a build/release gesture. No KHAOS source files were copied. Symphone has its own score model, orchestration algorithms, timed phrase capture, audio engine and interface. The shared third-party audio dependency is `smplr`.
+
+The repository was initially named Tutti. The Symphone rename preserves Git history and reads existing Tutti sessions from this browser before saving them under the new name.

@@ -47,10 +47,15 @@ import InstrumentGlyph from "./InstrumentGlyph";
 import Ensemble from "./Ensemble";
 
 const KEYS = ["a", "s", "d", "f", "g", "h", "j", "k"];
-const STORAGE_KEY = "tutti.score.v1";
+const STORAGE_KEY = "symphone.score.v1";
+const LEGACY_STORAGE_KEY = "tutti.score.v1";
 function initialScore(): Score {
   try {
-    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null");
+    const stored = JSON.parse(
+      localStorage.getItem(STORAGE_KEY) ??
+        localStorage.getItem(LEGACY_STORAGE_KEY) ??
+        "null",
+    );
     if (
       stored &&
       SCENES.some((s) => s.id === stored.scene) &&
@@ -366,7 +371,7 @@ export default function Orchestra() {
     const url = URL.createObjectURL(blob),
       anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = "tutti-score.json";
+    anchor.download = "symphone-score.json";
     anchor.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     setNotice("Score exported. Your session is also saved in this browser.");
@@ -398,14 +403,14 @@ export default function Orchestra() {
   return (
     <div className={`studio ${playing ? "playing" : ""}`}>
       <header className="site-header">
-        <a className="wordmark" href="#" aria-label="Tutti home">
+        <a className="wordmark" href="#" aria-label="Symphone home">
           <span className="brand-icon">
             <i />
             <i />
             <i />
             <i />
           </span>
-          tutti<span className="brand-period">.</span>
+          symphone<span className="brand-period">.</span>
         </a>
         <div className="header-caption">
           A LITTLE IMPULSE. A WHOLE ORCHESTRA.

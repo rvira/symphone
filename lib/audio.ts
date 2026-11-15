@@ -519,7 +519,7 @@ class OrchestraEngine {
       const url = URL.createObjectURL(blob),
         anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = `tutti-${Date.now()}.${mimeType.includes("mp4") ? "m4a" : "webm"}`;
+      anchor.download = `symphone-${Date.now()}.${mimeType.includes("mp4") ? "m4a" : "webm"}`;
       anchor.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     };
