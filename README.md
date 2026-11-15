@@ -24,6 +24,7 @@ npm run preview
 
 - **Choose a scene:** Open horizon (D major), In motion (D minor), or After midnight (A dorian). Each starts an eight-bar orchestration.
 - **Choose a section:** violins, cellos, flute, French horns, harp, timpani, analog pulse, or atmosphere. Click the score, seating map or instrument selector.
+- **Take in the stage:** the original 3D miniature shows the orchestra with chairs, music stands, instruments and a conductor. Its gestures follow the music. Select Still view to stop stage motion, or Seating plan for a flat diagram. Device reduced-motion preferences are respected automatically.
 - **Play pads:** use A–K or hold the on-screen pads. All eight notes belong to the selected scale.
 - **Weave a phrase:** up to 16 played pitches and their relative onset times become a quantized two-bar phrase repeated through the movement. The first layer replaces that section’s generated part; up to three layers can be stacked. Notes beyond the two-bar capture window are omitted. Undo removes the newest layer and restores the generated part when the final layer is removed.
 - **Auto-evolve:** one eligible section is regenerated every two bars. Sections containing your phrases are preserved.
@@ -49,12 +50,18 @@ app/
 components/
   Orchestra.tsx            UI, keyboard input, state and persistence
   Ensemble.tsx             Interactive orchestra seating map
+  Stage3D.tsx              Lazy-loaded stage and WebGL fallback lifecycle
+  StagePlan.tsx            Original SVG seating plan
   InstrumentGlyph.tsx      Original SVG instrument illustrations
 lib/
   score.ts                 Pure composition, harmony, evolution and phrase functions
   audio.ts                 Web Audio transport, voices, mixing, crescendo and recording
+  stage.ts                 Physical seating and score-driven visual activity
+  stage-scene.ts           Original Three.js concert-stage model and motion
 public/                    Static assets
 tests/score.test.ts         Musical and transport invariants
+tests/stage.test.ts         Seating and performance-activity invariants
+docs/DESIGN.md              Concert-hall references, palette and motion choices
 ```
 
 `Score` is plain data: eight instrument parts with MIDI notes, step positions, durations, velocities and mix settings. The UI sends edited scores into the engine. The engine indexes notes by step, schedules roughly 100 ms ahead on the audio clock, and sends timestamped playback events back to the UI. Each bar has sixteen sixteenth-note steps; a movement has 128 steps.

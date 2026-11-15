@@ -1,4 +1,4 @@
-import type { InstrumentId } from "./score";
+import type { InstrumentId, Score } from "./score";
 
 // Physical coordinates are shared by the seating plan and dimensional stage.
 export const STAGE_SECTIONS: {
@@ -33,4 +33,25 @@ export function playerPositions(section: (typeof STAGE_SECTIONS)[number]) {
       section.z +
       (Math.floor(i / section.columns) - (section.rows - 1) / 2) * 0.78,
   }));
+}
+
+// Motion follows actual score events, including mute/solo and live pad playing.
+export function sectionActivity(
+  score: Score,
+  id: InstrumentId,
+  step: number,
+  solo: InstrumentId | null,
+  selected: InstrumentId,
+  livePlaying: boolean,
+  playing: boolean,
+) {
+  const part = score.parts[id];
+  if (part.muted || (solo && solo !== id)) return 0;
+  if (livePlaying && selected === id) return 1;
+  if (!playing || step < 0) return 0;
+  return part.notes.some(
+    (note) => step >= note.step && step < note.step + note.duration,
+  )
+    ? 1
+    : 0;
 }

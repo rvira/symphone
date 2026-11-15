@@ -473,6 +473,10 @@ export default function Orchestra() {
               selected={selected}
               onSelect={select}
               crescendo={progress}
+              step={step}
+              score={score}
+              solo={solo}
+              livePlaying={activeNotes.length > 0}
             />
           </div>
         </section>
