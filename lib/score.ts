@@ -1093,8 +1093,106 @@ export function evolve(score: Score): Score {
   };
 }
 
-// Capture timing as well as pitch. A two-bar phrase is quantized to sixteenths,
-// repeated through the movement and stored separately from the generated part.
+// Key presses supply a pitch palette, not a recorded performance. Borrow the
+// scene/instrument's rhythmic grammar, then voice a returning motif against the
+// actual chord in each bar. Never invent pitches outside the user's palette.
+export function melodize(
+  score: Score,
+  id: InstrumentId,
+  captured: CapturedNote[],
+  layer = score.parts[id].layers + 1,
+): MusicalNote[] {
+  const palette = [
+    ...new Set(
+      captured
+        .slice(0, 16)
+        .map((n) => n.midi)
+        .filter((midi) => Number.isInteger(midi) && midi >= 0 && midi <= 127),
+    ),
+  ].sort((a, b) => a - b);
+  if (!palette.length) return [];
+  const scene = sceneForScore(score);
+  const seed = palette.reduce(
+    (value, midi) => (value * 31 + midi) >>> 0,
+    score.seed + layer * 7919,
+  );
+  const r = random(seed);
+  const barLength = stepsPerBar(score);
+  const motif = [
+    0,
+    Math.floor(palette.length / 2),
+    palette.length - 1,
+    Math.floor(palette.length / 2),
+  ];
+  const template = generatePart(id, scene, seed, score.energy)
+    .sort((a, b) => a.step - b.step)
+    .filter(
+      (note, index, notes) =>
+        index === 0 || note.step !== notes[index - 1].step,
+    )
+    // Leave breathing room at the end of four-bar sentences.
+    .filter(
+      (note) =>
+        Math.floor(note.step / barLength) % 4 !== 3 ||
+        note.step % barLength <= barLength / 2,
+    );
+  let previous = palette[0];
+  let position = 0;
+  let previousBar = -1;
+  return template.map((note, index) => {
+    const bar = Math.floor(note.step / barLength);
+    const local = note.step % barLength;
+    if (bar !== previousBar) {
+      position = 0;
+      previousBar = bar;
+    }
+    const phraseEnd =
+      bar % 4 === 3 &&
+      (index === template.length - 1 ||
+        Math.floor(template[index + 1].step / barLength) !== bar);
+    const chord = chordNotes(scene, scene.progression[bar]);
+    const pitchClass = (midi: number) => midi % 12;
+    const chordTones = palette.filter((midi) =>
+      chord.some((tone) => pitchClass(tone) === pitchClass(midi)),
+    );
+    const strong = local % scene.beatSteps === 0 || phraseEnd;
+    // Land on an offered chord tone when possible; otherwise retain the user's
+    // notes instead of silently substituting a different pitch.
+    const candidates = strong && chordTones.length ? chordTones : palette;
+    const motifIndex = motif[position++ % motif.length];
+    const target = phraseEnd ? palette[0] : palette[motifIndex];
+    const ranked = candidates
+      .map((midi) => ({
+        midi,
+        cost:
+          Math.abs(midi - target) * 0.4 +
+          Math.abs(midi - previous) * 0.2 +
+          (midi === previous && !strong ? 0.7 : 0) +
+          r() * 0.05,
+      }))
+      .sort((a, b) => a.cost - b.cost);
+    previous = ranked[0].midi;
+    const gap =
+      Math.min(
+        template[index + 1]?.step ?? totalSteps(score),
+        (bar + 1) * barLength,
+      ) - note.step;
+    const sustained = id === "texture" || id === "brass" || id === "cello";
+    const duration =
+      phraseEnd || sustained ? gap * 0.9 : Math.min(note.duration, gap * 0.8);
+    return {
+      step: note.step,
+      midi: previous,
+      duration: Math.max(0.5, duration),
+      velocity: Math.min(
+        1,
+        note.velocity * (strong ? 1 : 0.8) * (layer > 1 ? 0.82 : 1),
+      ),
+      layer,
+    };
+  });
+}
+
 export function weave(
   score: Score,
   id: InstrumentId,
@@ -1104,32 +1202,9 @@ export function weave(
   if (!captured.length || score.parts[id].layers >= MAX_LAYERS) return score;
   const part = score.parts[id],
     layer = part.layers + 1;
-  const stepMs = secondsPerStep(score) * 1000;
-  const phraseLength = stepsPerBar(score) * 2;
-  let previous = -1;
-  const phrase: MusicalNote[] = [];
-  for (const note of captured.slice(0, 16)) {
-    const step = Math.max(
-      previous + 1,
-      Math.round((note.time - captured[0].time) / stepMs),
-    );
-    if (step >= phraseLength) break;
-    phrase.push({
-      step,
-      duration: 2,
-      midi: note.midi,
-      velocity: layer > 1 ? 0.65 : 0.83,
-      layer,
-    });
-    previous = step;
-  }
-  phrase.forEach((n, i) => {
-    n.duration = Math.min(4, (phrase[i + 1]?.step ?? phraseLength) - n.step);
-  });
-  const repeated = Array.from({ length: 4 }, (_, i) =>
-    phrase.map((n) => ({ ...n, step: n.step + i * phraseLength })),
-  ).flat();
-  const notes = [...(part.layers ? part.notes : []), ...repeated].sort(
+  const melody = melodize(score, id, captured, layer);
+  if (!melody.length) return score;
+  const notes = [...(part.layers ? part.notes : []), ...melody].sort(
     (a, b) => a.step - b.step,
   );
   return {

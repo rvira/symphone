@@ -589,7 +589,7 @@ export default function Orchestra({
       setCaptured([]);
       setQueuedLayers((prev) => prev.filter((q) => q.id !== selected));
       setNotice(
-        `Phrase woven into ${instrumentFor(selected).name.toLowerCase()}.`,
+        `Melody composed from your notes for ${instrumentFor(selected).name.toLowerCase()}.`,
       );
       if (!orchestra.playing) void togglePlay();
     } else {
@@ -601,7 +601,7 @@ export default function Orchestra({
       ]);
       setCaptured([]);
       setNotice(
-        `Your phrase is queued for ${instrumentFor(selected).name.toLowerCase()} · Enters on next cycle downbeat.`,
+        `Your notes will become a melody for ${instrumentFor(selected).name.toLowerCase()} on the next cycle downbeat.`,
       );
     }
   };
@@ -1255,7 +1255,7 @@ export default function Orchestra({
             <div className="phrase-area">
               <div className="phrase-header">
                 <span>
-                  YOUR PHRASE{" "}
+                  YOUR NOTES{" "}
                   <span className="layer-count">
                     {part.layers}/{MAX_LAYERS} LAYERS
                   </span>
@@ -1281,10 +1281,15 @@ export default function Orchestra({
                   ))
                 ) : (
                   <p className="no-notes-hint">
-                    Tap a few pads with A–K to record notes for your phrase.
+                    Choose a few notes with the pads or A–K.
                   </p>
                 )}
               </div>
+
+              <p className="no-notes-hint">
+                Timing doesn’t matter. Symphone turns your notes into a melody
+                that fits the scene and chords.
+              </p>
 
               {/* Status if layer is currently queued for eventual cycle downbeat */}
               {selectedIsQueued && (
@@ -1324,12 +1329,10 @@ export default function Orchestra({
                     !captured.length ||
                     part.layers >= MAX_LAYERS
                   }
-                  title="Queue phrase to enter musically at the start of the next cycle"
+                  title="Compose a melody from your notes and enter on the next cycle"
                 >
                   <Sparkles size={16} />
-                  {part.layers
-                    ? "Queue Layer for Next Cycle"
-                    : "Queue Phrase for Next Cycle"}
+                  Melodize &amp; queue
                   <ArrowUpRight size={17} />
                 </button>
 
@@ -1339,9 +1342,9 @@ export default function Orchestra({
                     <button
                       className="weave-now-button"
                       onClick={() => weavePhrase(true)}
-                      title="Weave phrase immediately into the score"
+                      title="Compose and add a melody immediately"
                     >
-                      Weave Now
+                      Melodize now
                     </button>
                   )}
 
@@ -1492,9 +1495,11 @@ export default function Orchestra({
                 is tuned to the movement’s scale.
               </li>
               <li>
-                <strong>Weave phrases in eventual cycles.</strong> Play notes on
-                the pads, then click <em>Queue Layer for Next Cycle</em>. Your
-                melody enters smoothly on the next cycle downbeat.
+                <strong>Let Symphone melodize.</strong> Choose notes on the
+                pads, then click <em>Melodize &amp; queue</em>. Your tap timing
+                and order don’t matter: Symphone composes the rhythm and
+                phrasing for your instrument. The melody enters on the next
+                cycle downbeat.
               </li>
               <li>
                 <strong>Build an orchestral crescendo.</strong> Hit Crescendo to

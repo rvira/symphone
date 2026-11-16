@@ -91,16 +91,16 @@ export const TOUR_STEPS = [
   {
     id: "pads",
     target: ".pads",
-    title: "Play a little phrase.",
-    body: "Tap or hold the pads, or use A S D F G H J K when focus is outside the tour card. Every note is in the scene’s scale. Your pitches and timing appear in Your Phrase below.",
-    tip: "Try A–D–G–D, leaving a little space between notes. For keyboard playing, choose Try this section first. You can also Tab to a pad and use Enter.",
+    title: "Choose notes for a melody.",
+    body: "Tap or hold the pads, or use A S D F G H J K when focus is outside the tour card. Every note is in the scene’s scale. The notes you choose appear below; timing and order are not copied into the score.",
+    tip: "Try A, D and G in any order. Symphone uses these pitches as a palette and composes the rhythm for you. For keyboard playing, choose Try this section first. You can also Tab to a pad and use Enter.",
   },
   {
     id: "phrase",
     target: ".phrase-area",
-    title: "Give your phrase to the ensemble.",
-    body: "Queue Phrase for Next Cycle lets your notes join at the next eight-bar downbeat while playing. Weave Now adds them immediately; when stopped, the queue button weaves and starts playback. Up to 16 notes fit in a two-bar phrase, repeated across the movement.",
-    tip: "Build your foundation first, then play a few pads and queue the phrase. The first layer replaces that section’s generated notes; stack up to three. Undo removes the latest woven layer.",
+    title: "Let Symphone melodize.",
+    body: "Melodize & queue composes an eight-bar melody from your chosen pitches, with a returning motif, scene-aware rhythm, rests and chord-aware strong beats. It enters at the next cycle; Melodize now adds it immediately. When stopped, either action starts playback.",
+    tip: "Build first, choose a few notes and melodize. You don’t need to perform a rhythm. The first melody replaces that section’s generated notes; stack up to three layers. Undo removes the latest layer. Live pad auditions still sound immediately.",
   },
   {
     id: "mix",

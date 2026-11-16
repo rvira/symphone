@@ -18,7 +18,7 @@ Open [localhost:3000](http://localhost:3000). No account or API key needed.
 1. Choose a scene, instruments and chords in the right-hand desk.
 2. Click **Build foundation & play**.
 3. Enable **Auto-evolve** to add an instrument every two bars.
-4. Play the pads or keys **A S D F G H J K**, then weave your phrase into the score.
+4. Choose notes with the pads or **A S D F G H J K**, then **Melodize & queue**. Symphone composes the rhythm and phrasing—not your tap timing or order.
 
 - **Scenes** change the style without stopping playback or clearing your ensemble.
 - **Crescendo** adds a temporary build and release; **Record** saves browser audio.

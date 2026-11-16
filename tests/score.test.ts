@@ -14,6 +14,9 @@ import {
   reorchestrate,
   undoLayer,
   weave,
+  melodize,
+  chordNotes,
+  sceneForScore,
 } from "../lib/score";
 import { crescendoLength } from "../lib/audio";
 
@@ -42,7 +45,7 @@ test("all scenes produce deterministic, bounded, in-key eight-bar scores", () =>
     }
 });
 
-test("phrase weaving keeps performed rhythm, repeats at two bars, and caps layers", () => {
+test("weaving composes from the selected notes, ignores performed placement, and caps layers", () => {
   const score = compose("horizon", 7),
     midi = padNotes(score, "strings");
   const stepMs = 60000 / score.bpm / 4;
@@ -53,20 +56,85 @@ test("phrase weaving keeps performed rhythm, repeats at two bars, and caps layer
   ];
   let woven = weave(score, "strings", capture);
   assert.deepEqual(
+    woven,
+    weave(
+      score,
+      "strings",
+      [...capture].reverse().map((n, i) => ({ ...n, time: i * 90000 })),
+    ),
+  );
+  assert.notDeepEqual(
     woven.parts.strings.notes.slice(0, 3).map((n) => n.step),
     [0, 3, 7],
   );
-  assert.deepEqual(
-    woven.parts.strings.notes.slice(3, 6).map((n) => n.step),
-    [32, 35, 39],
+  assert.ok(
+    woven.parts.strings.notes.every((n) =>
+      capture.some((input) => input.midi === n.midi),
+    ),
   );
   assert.equal(woven.parts.strings.layers, 1);
   for (let i = 0; i < 10; i++) woven = weave(woven, "strings", capture);
   assert.equal(woven.parts.strings.layers, MAX_LAYERS);
-  assert.equal(
-    woven.parts.strings.notes.length,
-    capture.length * 4 * MAX_LAYERS,
-  );
+  for (let layer = 1; layer <= MAX_LAYERS; layer++)
+    assert.ok(woven.parts.strings.notes.some((n) => n.layer === layer));
+});
+
+test("melodizing follows each instrument and scene, anchors to offered chord tones and tolerates sparse input", () => {
+  for (const scene of SCENES) {
+    const score = compose(scene.id, 71);
+    for (const inst of INSTRUMENTS) {
+      const palette = padNotes(score, inst.id);
+      const input = palette.map((midi, i) => ({ midi, time: i * 25000 }));
+      const before = structuredClone(score);
+      const melody = melodize(score, inst.id, input);
+      assert.ok(melody.length > 0);
+      assert.deepEqual(
+        melody,
+        melodize(
+          score,
+          inst.id,
+          input.map((n) => ({ ...n, time: 0 })),
+        ),
+      );
+      for (const note of melody) {
+        assert.ok(palette.includes(note.midi));
+        assert.ok(Number.isInteger(note.step) && note.step >= 0);
+        assert.ok(
+          note.duration > 0 && note.step + note.duration <= totalSteps(score),
+        );
+        assert.ok(note.velocity > 0 && note.velocity <= 1);
+        if (note.step % scene.beatSteps === 0) {
+          const bar = Math.floor(note.step / scene.stepsPerBar);
+          const chord = chordNotes(
+            sceneForScore(score),
+            score.progression![bar],
+          );
+          assert.ok(chord.some((n) => n % 12 === note.midi % 12));
+        }
+      }
+      assert.deepEqual(score, before);
+      const single = melodize(score, inst.id, [input[0]]);
+      assert.ok(
+        single.length > 0 && single.every((n) => n.midi === input[0].midi),
+      );
+    }
+    assert.deepEqual(melodize(score, "strings", []), []);
+    assert.deepEqual(
+      melodize(score, "strings", [
+        { midi: NaN, time: 0 },
+        { midi: 128, time: 0 },
+      ]),
+      [],
+    );
+  }
+  const input = [72, 76, 79].map((midi) => ({ midi, time: 0 }));
+  const rhythm = (scene: "horizon" | "ballet" | "jig") =>
+    melodize(compose(scene, 71), "strings", input).map((n) => [
+      n.step,
+      n.velocity,
+    ]);
+  assert.notDeepEqual(rhythm("horizon"), rhythm("ballet"));
+  assert.notDeepEqual(rhythm("ballet"), rhythm("jig"));
 });
 
 test("evolution and intensity preserve user layers and mix state", () => {
@@ -164,7 +232,7 @@ test("waltzes and jigs use the same subdivisions but different beat groupings", 
   assert.equal(totalSteps(compose("horizon", 1)), 128);
 });
 
-test("every meter quantizes and repeats a captured two-bar phrase without overflowing", () => {
+test("every meter composes an eight-bar melody without overflowing", () => {
   for (const scene of SCENES) {
     const score = compose(scene.id, 6),
       phrase = stepsPerBar(score) * 2;
@@ -173,19 +241,11 @@ test("every meter quantizes and repeats a captured two-bar phrase without overfl
       { midi: 72, time: 1000 },
       { midi: 76, time: 1000 + ms * 5 },
       { midi: 79, time: 1000 + ms * (phrase - 1) },
-      { midi: 81, time: 1000 + ms * phrase }, // Outside the capture window.
+      { midi: 81, time: 1000 + ms * phrase }, // Timing no longer excludes notes.
     ]);
-    assert.deepEqual(
-      woven.parts.strings.notes.map((n) => n.step),
-      Array.from({ length: 4 }, (_, i) =>
-        [0, 5, phrase - 1].map((st) => st + i * phrase),
-      ).flat(),
-    );
-    assert.equal(
-      woven.parts.strings.notes.at(-1)!.step +
-        woven.parts.strings.notes.at(-1)!.duration,
-      totalSteps(score),
-    );
+    assert.ok(woven.parts.strings.notes.length > 4);
+    for (const note of woven.parts.strings.notes)
+      assert.ok(note.step + note.duration <= totalSteps(score));
     assert.deepEqual(
       undoLayer(woven, "strings").parts.strings.notes,
       score.parts.strings.notes,

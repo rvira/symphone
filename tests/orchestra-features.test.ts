@@ -178,11 +178,22 @@ test("phrase layers can be captured and woven into eventual score cycles", () =>
   assert.equal(updatedScore.parts.strings.layers, 1);
   assert.ok(updatedScore.parts.strings.notes.some((n) => n.layer === 1));
 
-  // The woven layer repeats across the movement (4 repeats of 2-bar phrase = 8 bars)
+  // The engine composes a full movement from the offered pitches, not tap count.
   const layerNotes = updatedScore.parts.strings.notes.filter(
     (n) => n.layer === 1,
   );
-  assert.equal(layerNotes.length, captured.length * 4);
+  assert.ok(layerNotes.length > captured.length);
+  assert.ok(
+    layerNotes.every((n) => captured.some((input) => input.midi === n.midi)),
+  );
+  assert.deepEqual(
+    weave(
+      score,
+      "strings",
+      captured.map((n) => ({ ...n, time: 0 })),
+    ),
+    updatedScore,
+  );
 
   // Second layer stacking
   const captured2: CapturedNote[] = [
