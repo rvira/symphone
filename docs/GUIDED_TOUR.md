@@ -9,3 +9,5 @@ Onboarding eligibility is captured before the initial score autosave. A saved sc
 The non-modal dialog allows trying the actual app without trapping focus. Each step focuses its heading for screen readers, Escape dismisses it, and dismissal restores the previous focus or the Help control. Highlight overlays do not intercept pointer input. Positioning responds to scrolling, viewport changes and content resizing. Reduced-motion preferences disable highlight movement; step scrolling is immediate. No new dependencies or external onboarding service are used.
 
 Implementation: `components/GuidedTour.tsx`, its scoped stylesheet and `lib/tour.ts`. Tests cover first-visit eligibility, dismissal persistence, saved-score preservation, section coverage and viewport positioning.
+
+Foundation setup now lives in the black right-hand instrument desk alongside live playing. The shared instrument picker selects starting voices during setup and live voices after Build. Chord pads replace dropdowns; Build also starts playback. The walkthrough explains Edit foundation for reopening the folded setup controls.

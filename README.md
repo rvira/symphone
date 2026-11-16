@@ -22,7 +22,7 @@ npm start
 
 ## Play
 
-- **Build from Nothing (default):** The working score starts with all eight rows genuinely empty. Choose one or more starting instruments and one diatonic chord per bar, then click **Build foundation**. Only those selected parts are generated. Press Play to listen, or Auto-evolve to start playback and grow the ensemble. Rebuilding replaces existing parts and woven phrases; it does not start audio automatically.
+- **Build from Nothing (default):** The working score starts with all eight rows genuinely empty. Everything is in the existing black right-hand instrument desk, not a separate page section. Choose starting instruments, tap a bar and a chord pad to assign and preview its chord (the selection advances to the next bar). Click **Build foundation & play** to generate only those parts and start playback. The same instrument picker then chooses your live voice, with live pads and phrase weaving directly below—no Build/Play tabs or duplicate selectors. Setup folds away after Build; **Edit foundation** reopens it. Rebuilding replaces existing parts and woven phrases and restarts playback.
 - **Full Orchestra (quick start):** All eight sections are generated immediately. This remains a separate entry path for instant listening and playing along. The two modes keep independent saved scores on this device; returning players can resume their work.
 - **Eventual cycle phrase weaving:** Use keys A–K or tap on-screen pads to capture notes. Clicking **Queue Layer for Next Cycle** queues your phrase to enter smoothly on the next cycle downbeat, matching authentic orchestral performance practice. An instant **Weave Now** option is also available.
 - **Choose a scene:** Browse 12 musical worlds, filtered by Ballet & classical, Folk or Cinematic. Scenes set the scale, meter, melodic style, tempo and instrument balance. In Build from Nothing they reset to an empty score with suggested chords; no parts are generated until Build.
@@ -62,7 +62,7 @@ app/
   globals.css              Responsive studio design
 components/
   Orchestra.tsx            UI, keyboard input, state and persistence
-  FoundationBuilder.tsx    Starting instruments, eight chord selectors and Build
+  FoundationBuilder.tsx    Shared instrument picker, chord pads and Build & play
   SceneLibrary.tsx         Filterable scene cards and movement descriptions
   Ensemble.tsx             Interactive orchestra seating map
   Stage3D.tsx              Lazy-loaded stage and WebGL fallback lifecycle

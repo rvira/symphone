@@ -1,123 +1,232 @@
-.foundation-builder {
-  margin: 28px 0 20px;
-  padding: 25px;
-  border: 1px solid var(--border, #c9caba);
-  background: #f4f2e8;
-  border-radius: 7px;
+/* One integrated black desk: no extra page section or duplicate selector. */
+.studio .instrument-panel {
+  background: #111214;
+}
+.instrument-panel .instrument-heading {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.live-voice-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  flex-wrap: wrap;
+  color: #eee6d7;
+}
+.live-voice-label h3 {
+  font:
+    22px/1.2 "Cormorant Garamond",
+    Georgia,
+    serif;
+  margin: 0;
+}
+.live-voice-label .instrument-status {
+  font-size: 9px;
+  margin-left: auto;
+  color: #a7a6a6;
+}
+.instrument-panel .desk-title {
+  margin: 0;
+  font:
+    30px/1.15 "Cormorant Garamond",
+    Georgia,
+    serif;
+  color: #f5f0e6;
+}
+.instrument-panel .foundation-builder {
+  margin: 20px 0;
+  padding: 0 0 20px;
+  border: 0;
+  border-bottom: 1px solid #353639;
+  border-radius: 0;
+  background: transparent;
 }
 .foundation-heading {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
-.foundation-heading h2 {
-  margin: 5px 0 0;
+.foundation-heading h3,
+.chord-pad-heading h3 {
+  margin: 0;
   font:
-    30px/1.2 "Cormorant Garamond",
+    21px/1.2 "Cormorant Garamond",
     Georgia,
     serif;
-}
-.foundation-count {
-  color: #68745c;
-  font-size: 11px;
-  white-space: nowrap;
+  color: #f0e8d9;
 }
 .foundation-builder > p {
-  font-size: 12px;
-  line-height: 1.7;
-  color: #69735f;
-  max-width: 800px;
-  margin: 12px 0 20px;
-}
-.foundation-builder fieldset {
-  margin: 0 0 20px;
-  padding: 0;
-  border: 0;
-  min-width: 0;
-}
-.foundation-builder legend {
+  margin: 8px 0 14px;
   font-size: 11px;
-  font-weight: 600;
-  color: #566249;
-  margin-bottom: 12px;
+  line-height: 1.65;
+  color: #a6a6a8;
 }
-.foundation-instruments {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.foundation-instruments button {
+.edit-foundation {
   display: flex;
   align-items: center;
+  gap: 5px;
+  color: #d2b16c;
+  font-size: 10px;
+  padding: 6px 0;
+  white-space: nowrap;
+}
+.instrument-panel .foundation-instruments {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.instrument-panel .foundation-instruments button {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
   gap: 8px;
+  height: auto;
   min-height: 42px;
-  border: 1px solid #c7cabb;
-  padding: 8px 12px;
+  padding: 8px 10px;
+  border: 1px solid #414144;
   border-radius: 4px;
+  color: #c9c9c9;
+  background: #191a1c;
   font-size: 11px;
-  background: #eeefe4;
-  color: #606d51;
 }
-.foundation-instruments button[aria-pressed="true"] {
-  background: #dce4d0;
-  border-color: #879b70;
-  color: #35452c;
+.instrument-panel .foundation-instruments button > span {
+  overflow-wrap: anywhere;
 }
-.foundation-chords {
+.instrument-panel
+  .foundation-instruments
+  button
+  > svg:last-child:not(:first-child) {
+  margin-left: auto;
+}
+.instrument-panel .foundation-instruments button:hover {
+  border-color: #938160;
+  color: #faf2e2;
+  background: #222225;
+}
+.instrument-panel .foundation-instruments button[aria-pressed="true"] {
+  border-color: #c1a05c;
+  color: #f3dfb3;
+  background: #252320;
+}
+.chord-pad-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin: 20px 0 10px;
+}
+.chord-pad-heading > span {
+  color: #b9b0a0;
+  font-size: 10px;
+}
+.foundation-bars {
   display: grid;
   grid-template-columns: repeat(8, minmax(0, 1fr));
-  gap: 8px;
+  border: 1px solid #424244;
+  border-radius: 5px;
+  overflow: hidden;
 }
-.foundation-chords label {
+.foundation-bars button {
   min-width: 0;
+  padding: 7px 1px;
+  min-height: 49px;
+  color: #d0ccc5;
+  border-right: 1px solid #353537;
 }
-.foundation-chords label > span {
+.foundation-bars button:last-child {
+  border-right: 0;
+}
+.foundation-bars small {
   display: block;
-  font-size: 9px;
-  color: #747e67;
-  letter-spacing: 0.5px;
-  margin-bottom: 6px;
+  font-size: 8px;
+  color: #aaa49b;
+  margin-bottom: 4px;
 }
-.foundation-chords select {
-  font: inherit;
-  font-size: 14px;
-  width: 100%;
-  min-height: 42px;
-  padding: 8px;
-  color: #3f5036;
-  background: #f8f7ef;
-  border: 1px solid #bcc4ae;
-  border-radius: 4px;
+.foundation-bars span {
+  font-size: 11px;
 }
-.foundation-chords select:focus-visible {
-  outline: 2px solid #8e9c71;
-  outline-offset: 3px;
+.foundation-bars button[aria-pressed="true"] {
+  background: #302a1f;
+  box-shadow: inset 0 -2px #c9a761;
+  color: #ffe6b6;
+}
+.foundation-chord-pads {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 12px;
+}
+.foundation-chord-pads button {
+  min-width: 0;
+  min-height: 48px;
+  border: 1px solid #d4c7b0;
+  border-bottom: 3px solid #a69a84;
+  border-radius: 5px;
+  background: #eee8db;
+  color: #242323;
+  font:
+    20px/1.1 "Cormorant Garamond",
+    Georgia,
+    serif;
+  touch-action: manipulation;
+  transition:
+    transform 90ms,
+    background 90ms;
+}
+.foundation-chord-pads button:hover {
+  background: #fff4df;
+}
+.foundation-chord-pads button:active {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
+  background: #e6ce9b;
+}
+.foundation-builder .chord-pad-hint {
+  font-size: 10px;
+  color: #a6a3a0;
+  margin: 10px 0 14px;
 }
 .foundation-actions {
   display: flex;
-  align-items: center;
-  gap: 18px;
+  flex-direction: column;
+  gap: 10px;
 }
 .build-foundation {
   display: flex;
-  gap: 8px;
   align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 8px;
   min-height: 44px;
-  padding: 12px 19px;
+  padding: 11px 12px;
   border-radius: 4px;
-  background: #536847;
-  color: #fffdf4;
+  background: #cfaf6b;
+  border: 1px solid #ead09b;
+  color: #1b1813;
   font-size: 12px;
-  white-space: nowrap;
+  font-weight: 600;
 }
 .build-foundation:hover:not(:disabled) {
-  background: #405536;
+  background: #e4c78a;
 }
 .foundation-actions small {
   font-size: 10px;
   line-height: 1.6;
-  color: #707b62;
+  color: #a8a29a;
+}
+.desk-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 .empty-track-label {
   position: absolute;
@@ -129,21 +238,17 @@
   font-size: 9px;
   letter-spacing: 0.5px;
 }
-@media (max-width: 700px) {
-  .foundation-builder {
-    padding: 18px;
-  }
+@media (max-width: 420px) {
   .foundation-heading {
     align-items: flex-start;
-    flex-direction: column;
-    gap: 8px;
+    flex-wrap: wrap;
   }
-  .foundation-chords {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+  .foundation-bars span {
+    font-size: 10px;
   }
-  .foundation-actions {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 10px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .foundation-chord-pads button {
+    transition: none;
   }
 }

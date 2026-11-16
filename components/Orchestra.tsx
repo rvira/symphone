@@ -43,6 +43,8 @@ import {
   activeInstruments,
   playableScore,
   validProgression,
+  chordNotes,
+  sceneForScore,
   instrumentFor,
   noteName,
   padNotes,
@@ -297,6 +299,46 @@ export default function Orchestra({
     [release, space],
   );
 
+  // Chord pads audition harmony without recording notes into the live phrase.
+  const previewChord = useCallback(async (degree: number) => {
+    const key = "chord-preview";
+    const previous = held.current.get(key);
+    if (previous) {
+      previous.released = true;
+      previous.release?.();
+    }
+    const releases: Array<() => void> = [];
+    const entry = {
+      released: false,
+      release: () => releases.forEach((stop) => stop()),
+    };
+    held.current.set(key, entry);
+    const id = selectedRef.current;
+    try {
+      await Promise.all(
+        chordNotes(
+          sceneForScore(scoreRef.current),
+          degree,
+          instrumentFor(id).register,
+        ).map(async (midi) => {
+          const stop = await orchestra.live(id, midi);
+          if (entry.released) stop();
+          else releases.push(stop);
+        }),
+      );
+      setTimeout(() => {
+        entry.released = true;
+        entry.release();
+        if (held.current.get(key) === entry) held.current.delete(key);
+      }, 650);
+    } catch (error) {
+      entry.released = true;
+      entry.release();
+      if (held.current.get(key) === entry) held.current.delete(key);
+      setNotice((error as Error).message);
+    }
+  }, []);
+
   const togglePlay = useCallback(async () => {
     if (busy.current) return;
     if (orchestra.playing) {
@@ -415,9 +457,11 @@ export default function Orchestra({
     setQueuedLayers([]);
     setSolo(null);
     apply(buildFoundation(scoreRef.current, instruments, progression));
+    if (!instruments.includes(selectedRef.current)) setSelected(instruments[0]);
     setNotice(
-      "Foundation built. Press Play to listen, or Auto-evolve to grow the orchestra.",
+      "Foundation built. Play live over it, weave a phrase, or enable Auto-evolve to grow the ensemble.",
     );
+    void togglePlay();
   };
 
   const build = useCallback(() => {
@@ -843,14 +887,6 @@ export default function Orchestra({
           onNew={() => newMovement()}
         />
 
-        {buildMode && (
-          <FoundationBuilder
-            key={`${score.scene}:${score.seed}`}
-            score={score}
-            onBuild={buildStartingScore}
-          />
-        )}
-
         {/* Working Studio Workspace */}
         <div className="workspace">
           {/* Arrangement Score */}
@@ -1083,52 +1119,29 @@ export default function Orchestra({
           <section
             className="instrument-panel panel"
             style={{ "--section-color": instrument.color } as CSSProperties}
-            aria-labelledby="instrument-heading"
+            aria-labelledby="instrument-desk-heading"
           >
             <div className="instrument-heading">
-              <span className="eyebrow">TAKE YOUR SEAT</span>
-              <span className="live-badge">
-                <span className="live-pulsing-dot" />
-                PLAY LIVE (KEYS A–K)
-              </span>
+              <h2 id="instrument-desk-heading" className="desk-title">
+                Instrument desk
+              </h2>
             </div>
 
-            <div className="instrument-title">
-              <span className="instrument-large-icon">
-                <InstrumentGlyph id={selected} size={44} />
+            <FoundationBuilder
+              key={`${buildMode ? "build" : "full"}:${score.scene}:${score.seed}`}
+              score={score}
+              onBuild={buildStartingScore}
+              selected={selected}
+              onSelect={select}
+              onPreviewChord={(degree) => void previewChord(degree)}
+            />
+
+            <div className="live-voice-label">
+              <InstrumentGlyph id={selected} size={21} />
+              <h3 id="instrument-heading">Play live · {instrument.name}</h3>
+              <span className="instrument-status">
+                {statusText(selected, statuses[selected])}
               </span>
-              <div>
-                <h2 id="instrument-heading">{instrument.name}</h2>
-                <div className="instrument-meta-line">
-                  <span className="instrument-family">{instrument.family}</span>
-                  <i className="dot-sep" />
-                  <span className="instrument-status">
-                    {statusText(selected, statuses[selected])}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <p className="instrument-description">{instrument.role}.</p>
-
-            {/* Quick 8-Section Selector */}
-            <div
-              className="instrument-picker"
-              aria-label="Select an instrument section"
-            >
-              {INSTRUMENTS.map((inst) => (
-                <button
-                  key={inst.id}
-                  onClick={() => select(inst.id)}
-                  className={selected === inst.id ? "selected" : ""}
-                  title={`${inst.name} (${inst.family})`}
-                  aria-label={`Play ${inst.name}`}
-                  aria-pressed={selected === inst.id}
-                >
-                  <InstrumentGlyph id={inst.id} size={24} />
-                  <span className="inst-picker-label">{inst.name}</span>
-                </button>
-              ))}
             </div>
 
             {/* Live Performance Pads (A–K) */}
@@ -1400,8 +1413,10 @@ export default function Orchestra({
             <ol>
               <li>
                 <strong>Build from Nothing.</strong> Choose starting instruments
-                and one chord per bar, then Build foundation. Only those parts
-                appear. Full Orchestra is a separate quick-start option.
+                and assign chords with the pads in the right-hand desk, then
+                Build foundation &amp; play. Only those parts appear and
+                playback begins. Full Orchestra is a separate quick-start
+                option.
               </li>
               <li>
                 <strong>Grow the ensemble.</strong> Press Play to hear your

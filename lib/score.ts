@@ -498,6 +498,28 @@ export function chordLabel(scene: Scene, degree: number) {
     fifth = degreeMidi(scene, degree + 4) - root;
   return noteName(root) + (fifth === 6 ? "dim" : third === 3 ? "m" : "");
 }
+export const chordNotes = (scene: Scene, degree: number, register = 60) =>
+  [0, 2, 4].map((offset) => degreeMidi(scene, degree + offset, register));
+
+export function assignChord(
+  progression: readonly number[],
+  bar: number,
+  degree: number,
+): number[] {
+  if (
+    !validProgression(progression) ||
+    !Number.isInteger(bar) ||
+    bar < 0 ||
+    bar >= BARS ||
+    !Number.isInteger(degree) ||
+    degree < 0 ||
+    degree > 6
+  )
+    throw new Error("Choose a valid bar and an in-key chord.");
+  return progression.map((current, index) =>
+    index === bar ? degree : current,
+  );
+}
 export type CapturedNote = { midi: number; time: number };
 export const sceneFor = (id: SceneId): Scene =>
   SCENES.find((s) => s.id === id)!;
