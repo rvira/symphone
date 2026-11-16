@@ -1,6 +1,7 @@
 import type { Soundfont } from "smplr";
 import {
-  evolve,
+  evolveAtBoundary,
+  playableScore,
   weave,
   INSTRUMENTS,
   stepsPerBar,
@@ -24,54 +25,14 @@ export type PlaybackEvent = {
   crescendo: number;
   drop?: boolean;
   cycleBoundary?: boolean;
-  buildupStage?: number;
-  newBuildupStage?: boolean;
   layerApplied?: QueuedLayerApplied[];
+  instrumentEntered?: InstrumentId;
 };
 export type SampleStatus = "not-loaded" | "loading" | "ready" | "fallback";
 export const crescendoLength = (step: number, barLength = 16) =>
   barLength - (step % barLength) + barLength;
 
-export const BUILDUP_STAGES: readonly (readonly InstrumentId[])[] = [
-  ["cello", "texture"], // Stage 0: Foundation
-  ["cello", "texture", "harp", "pulse"], // Stage 1: Pluck & Motion
-  ["cello", "texture", "harp", "pulse", "strings", "woodwinds"], // Stage 2: Melodic soaring voices
-  [
-    "cello",
-    "texture",
-    "harp",
-    "pulse",
-    "strings",
-    "woodwinds",
-    "brass",
-    "percussion",
-  ], // Stage 3: Full grand ensemble!
-] as const;
-
-export const BUILDUP_STAGE_NAMES = [
-  {
-    name: "Foundation",
-    entering: "Cellos & Atmosphere",
-    desc: "Warm harmonic bedrock",
-  },
-  {
-    name: "Motion & Pluck",
-    entering: "Harp & Analog Pulse",
-    desc: "Rhythmic pulse & harp shimmer",
-  },
-  {
-    name: "Melodic Rise",
-    entering: "Violins & Flute",
-    desc: "Soaring orchestral melody",
-  },
-  {
-    name: "Grand Ensemble",
-    entering: "French Horns & Timpani",
-    desc: "Full orchestral power",
-  },
-] as const;
-
-class OrchestraEngine {
+export class OrchestraEngine {
   private context: AudioContext | null = null;
   private master!: GainNode;
   private highpass!: BiquadFilterNode;
@@ -100,8 +61,6 @@ class OrchestraEngine {
   playing = false;
   autoEvolve = false;
   solo: InstrumentId | null = null;
-  buildMode = false;
-  buildupStage = 0;
   private pendingWeaves: Array<{ id: InstrumentId; captured: CapturedNote[] }> =
     [];
 
@@ -232,7 +191,6 @@ class OrchestraEngine {
       // A new movement starts on its own downbeat, including when meter changes.
       this.absoluteStep = 0;
       this.build = null;
-      if (this.buildMode) this.buildupStage = 0;
       this.events = [];
       for (const release of [...this.releases]) release();
       this.samples.forEach((sample) => sample.stop());
@@ -254,28 +212,6 @@ class OrchestraEngine {
       this.index.set(inst.id, steps);
     }
     this.updateMix();
-  }
-
-  setBuildMode(enabled: boolean) {
-    this.buildMode = enabled;
-    if (enabled) {
-      this.buildupStage = 0;
-    }
-    this.updateMix();
-  }
-
-  setBuildupStage(stage: number) {
-    this.buildupStage = Math.max(0, Math.min(BUILDUP_STAGES.length - 1, stage));
-    this.updateMix();
-  }
-
-  advanceBuildup(): boolean {
-    if (this.buildupStage < BUILDUP_STAGES.length - 1) {
-      this.buildupStage++;
-      this.updateMix();
-      return true;
-    }
-    return false;
   }
 
   queueWeave(id: InstrumentId, captured: CapturedNote[]) {
@@ -302,22 +238,10 @@ class OrchestraEngine {
 
   private updateMix() {
     if (!this.context || !this.score) return;
-    const activeBuildup = this.buildMode
-      ? BUILDUP_STAGES[Math.min(this.buildupStage, BUILDUP_STAGES.length - 1)]
-      : null;
-
     for (const inst of INSTRUMENTS) {
       const part = this.score.parts[inst.id];
-      const excludedByBuild =
-        this.buildMode &&
-        activeBuildup !== null &&
-        !activeBuildup.includes(inst.id) &&
-        part.layers === 0;
-
       const silent =
-        part.muted ||
-        (this.solo !== null && this.solo !== inst.id) ||
-        excludedByBuild;
+        part.muted || (this.solo !== null && this.solo !== inst.id);
 
       this.channels
         .get(inst.id)
@@ -335,12 +259,10 @@ class OrchestraEngine {
   }
 
   async start() {
+    if (!this.score || !playableScore(this.score)) return;
     await this.init();
-    if (this.playing || !this.score) return;
+    if (this.playing || !this.score || !playableScore(this.score)) return;
     this.absoluteStep = 0;
-    if (this.buildMode) {
-      this.buildupStage = 0;
-    }
     this.updateMix();
     this.nextTime = this.context!.currentTime + 0.06;
     this.playing = true;
@@ -372,7 +294,7 @@ class OrchestraEngine {
     while (this.nextTime < ctx.currentTime + 0.1) {
       let drop = false,
         updated: Score | undefined;
-      let newBuildupStage = false;
+      let instrumentEntered: InstrumentId | undefined;
       let appliedLayers: QueuedLayerApplied[] | undefined;
 
       if (this.build && this.build.remaining === 0) {
@@ -391,8 +313,12 @@ class OrchestraEngine {
         (step === 0 ||
           this.absoluteStep % (stepsPerBar(this.score!) * 2) === 0);
 
-      // Eventual cycle weaving: apply queued layers on the 2-bar or movement cycle downbeat!
-      if (isCycleBoundary && this.pendingWeaves.length > 0) {
+      // Queued user phrases enter on the full eight-bar movement boundary.
+      if (
+        this.absoluteStep > 0 &&
+        step === 0 &&
+        this.pendingWeaves.length > 0
+      ) {
         appliedLayers = [];
         let curScore = updated ?? this.score!;
         for (const p of this.pendingWeaves) {
@@ -404,31 +330,23 @@ class OrchestraEngine {
         this.setScore(updated);
       }
 
-      // In build mode: advance the buildup stage across musical cycles (every 2 bars)
-      if (
-        this.buildMode &&
-        isCycleBoundary &&
-        this.buildupStage < BUILDUP_STAGES.length - 1
-      ) {
-        this.buildupStage++;
-        newBuildupStage = true;
-        this.updateMix();
-      }
-
-      if (
-        this.autoEvolve &&
-        !this.build &&
-        this.absoluteStep > 0 &&
-        this.absoluteStep % (stepsPerBar(this.score!) * 2) === 0
-      ) {
-        updated = evolve(updated ?? this.score!);
+      const beforeEvolution = updated ?? this.score!;
+      const evolved = evolveAtBoundary(
+        beforeEvolution,
+        this.absoluteStep,
+        this.autoEvolve && !this.build,
+      );
+      if (evolved !== beforeEvolution) {
+        instrumentEntered = INSTRUMENTS.find(
+          (i) =>
+            !beforeEvolution.parts[i.id].notes.length &&
+            evolved.parts[i.id].notes.length,
+        )?.id;
+        updated = evolved;
         this.setScore(updated);
       }
 
       const activeScore = updated ?? this.score!;
-      const activeBuildup = this.buildMode
-        ? BUILDUP_STAGES[Math.min(this.buildupStage, BUILDUP_STAGES.length - 1)]
-        : null;
 
       const seconds = secondsPerStep(activeScore);
       const progress = this.build
@@ -438,14 +356,6 @@ class OrchestraEngine {
       for (const inst of INSTRUMENTS) {
         const part = activeScore.parts[inst.id];
         if (part.muted || (this.solo && this.solo !== inst.id)) continue;
-        if (
-          this.buildMode &&
-          activeBuildup &&
-          !activeBuildup.includes(inst.id) &&
-          part.layers === 0
-        ) {
-          continue;
-        }
         if (this.build && ["cello", "percussion", "pulse"].includes(inst.id))
           continue;
 
@@ -487,8 +397,7 @@ class OrchestraEngine {
         crescendo: progress,
         drop,
         cycleBoundary: isCycleBoundary,
-        buildupStage: this.buildupStage,
-        newBuildupStage,
+        instrumentEntered,
         layerApplied: appliedLayers,
       });
 

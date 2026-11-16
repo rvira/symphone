@@ -2,7 +2,7 @@
 
 First-time players see a skippable 12-stop walkthrough. Each stop scrolls to and highlights a real control, explains it, and suggests what to select. The tour does not click controls, play audio, change scenes or edit a score. Players can try controls through the highlight, move backward and forward, or leave with **Skip tour** / **Escape** at every step. **Try this section** moves keyboard focus to the highlighted controls; the card remains available.
 
-The tour covers the starting modes, scenes, stage, playback, score, instrument selector, pads, phrase queuing, mixing, evolution/crescendo and recording/export. **How to play → Take the guided tour** restarts it on demand, including for existing players.
+The tour covers the starting modes, scenes, foundation instruments and chords, playback, score, instrument selector, pads, phrase queuing, mixing, evolution/crescendo and recording/export. **How to play → Take the guided tour** restarts it on demand, including for existing players.
 
 Onboarding eligibility is captured before the initial score autosave. A saved score (including legacy keys) identifies a returning player; they are not interrupted. `symphone.tour.v1` remembers an offered, skipped or completed tour separately from score data. Offering immediately marks it seen, so refreshing an unfinished walkthrough does not restart it. If browser storage is blocked, the tour still works, but cannot remember dismissal across reloads.
 

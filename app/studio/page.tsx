@@ -6,9 +6,9 @@ import Orchestra from "../../components/Orchestra";
 
 function StudioContent() {
   const searchParams = useSearchParams();
-  const mode = searchParams.get("mode") === "build" ? "build" : "full";
+  const mode = searchParams.get("mode") === "full" ? "full" : "build";
 
-  return <Orchestra initialMode={mode} />;
+  return <Orchestra key={mode} initialMode={mode} />;
 }
 
 export default function StudioPage() {
@@ -33,4 +33,3 @@ export default function StudioPage() {
     </Suspense>
   );
 }
-

@@ -26,7 +26,11 @@ test("only new players are offered the tour automatically", () => {
     assert.equal(fresh.getItem(TOUR_STORAGE_KEY), status);
     assert.equal(shouldOfferTour(fresh), false);
   }
-  for (const key of ["symphone.score.v1", "symphone.legacy.score.v1"]) {
+  for (const key of [
+    "symphone.score.v1",
+    "symphone.legacy.score.v1",
+    "symphone.build.score.v1",
+  ]) {
     const returning = storage();
     returning.setItem(key, "{}");
     assert.equal(shouldOfferTour(returning), false);
@@ -58,7 +62,7 @@ test("the walkthrough covers every main section with a concrete suggestion", () 
       "welcome",
       "entrance",
       "scenes",
-      "stage",
+      "foundation",
       "playback",
       "score",
       "instrument",

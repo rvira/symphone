@@ -16,7 +16,6 @@ import {
   Clock,
   Compass,
   Download,
-  FastForward,
   Headphones,
   HelpCircle,
   Layers,
@@ -30,12 +29,7 @@ import {
   Waves,
   X,
 } from "lucide-react";
-import {
-  orchestra,
-  BUILDUP_STAGES,
-  BUILDUP_STAGE_NAMES,
-  type SampleStatus,
-} from "../lib/audio";
+import { orchestra, type SampleStatus } from "../lib/audio";
 import {
   BARS,
   INSTRUMENTS,
@@ -44,6 +38,11 @@ import {
   stepsPerBar,
   totalSteps,
   compose,
+  emptyScore,
+  buildFoundation,
+  activeInstruments,
+  playableScore,
+  validProgression,
   instrumentFor,
   noteName,
   padNotes,
@@ -58,19 +57,23 @@ import {
 } from "../lib/score";
 import InstrumentGlyph from "./InstrumentGlyph";
 import Ensemble from "./Ensemble";
+import FoundationBuilder from "./FoundationBuilder";
 import SceneLibrary from "./SceneLibrary";
 import GuidedTour from "./GuidedTour";
 import { browserTourStorage, shouldOfferTour } from "../lib/tour";
 
 const KEYS = ["a", "s", "d", "f", "g", "h", "j", "k"];
 const STORAGE_KEY = "symphone.score.v1";
+const BUILD_STORAGE_KEY = "symphone.build.score.v1";
 const LEGACY_STORAGE_KEY = "symphone.legacy.score.v1";
 
-function initialScore(): Score {
+function initialScore(mode: "build" | "full"): Score {
   try {
     const stored = JSON.parse(
-      localStorage.getItem(STORAGE_KEY) ??
-        localStorage.getItem(LEGACY_STORAGE_KEY) ??
+      localStorage.getItem(
+        mode === "build" ? BUILD_STORAGE_KEY : STORAGE_KEY,
+      ) ??
+        (mode === "full" ? localStorage.getItem(LEGACY_STORAGE_KEY) : null) ??
         "null",
     );
     if (
@@ -81,6 +84,17 @@ function initialScore(): Score {
       stored.bpm <= 160 &&
       Number.isFinite(stored.energy) &&
       Number.isInteger(stored.generation) &&
+      (!stored.progression || validProgression(stored.progression)) &&
+      (mode === "build"
+        ? stored.construction &&
+          typeof stored.construction.built === "boolean" &&
+          Array.isArray(stored.construction.startingInstruments) &&
+          stored.construction.startingInstruments.every((id: string) =>
+            INSTRUMENTS.some((i) => i.id === id),
+          ) &&
+          (stored.construction.built ||
+            INSTRUMENTS.every((i) => stored.parts?.[i.id]?.notes?.length === 0))
+        : !stored.construction) &&
       INSTRUMENTS.every((i) => {
         const p = stored.parts?.[i.id];
         return (
@@ -116,15 +130,15 @@ function initialScore(): Score {
   } catch {
     /* Corrupt or unavailable local storage starts a fresh session. */
   }
-  return compose();
+  return mode === "build" ? emptyScore() : compose();
 }
 
 export default function Orchestra({
-  initialMode = "full",
+  initialMode = "build",
 }: {
   initialMode?: "full" | "build";
 }) {
-  const [score, setScore] = useState<Score>(initialScore);
+  const [score, setScore] = useState<Score>(() => initialScore(initialMode));
   const scoreRef = useRef(score);
   const [playing, setPlaying] = useState(false);
   const [selected, setSelected] = useState<InstrumentId>("strings");
@@ -150,8 +164,7 @@ export default function Orchestra({
   const [drop, setDrop] = useState(0);
 
   // Buildup mode & eventual cycle layer states
-  const [buildMode, setBuildMode] = useState(initialMode === "build");
-  const [buildupStage, setBuildupStage] = useState(0);
+  const buildMode = !!score.construction;
   const [queuedLayers, setQueuedLayers] = useState<
     Array<{ id: InstrumentId; captured: CapturedNote[] }>
   >([]);
@@ -170,14 +183,17 @@ export default function Orchestra({
   }, []);
 
   useEffect(() => {
-    orchestra.setBuildMode(initialMode === "build");
+    orchestra.autoEvolve = false;
     orchestra.setScore(scoreRef.current);
     return orchestra.subscribeStatus(() => setStatuses(orchestra.sampleStatus));
-  }, [initialMode]);
+  }, []);
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(score));
+      localStorage.setItem(
+        score.construction ? BUILD_STORAGE_KEY : STORAGE_KEY,
+        JSON.stringify(score),
+      );
     } catch {
       /* Playback works without storage. */
     }
@@ -203,15 +219,10 @@ export default function Orchestra({
         setStep(event.step);
         setProgress(event.crescendo);
 
-        if (event.buildupStage !== undefined) {
-          setBuildupStage(event.buildupStage);
-        }
-
-        if (event.newBuildupStage && event.buildupStage !== undefined) {
-          const st = BUILDUP_STAGE_NAMES[event.buildupStage];
-          if (st) {
-            setNotice(`Crescendo: ${st.entering} have joined the orchestra!`);
-          }
+        if (event.instrumentEntered) {
+          setNotice(
+            `${instrumentFor(event.instrumentEntered).name} joined the orchestra.`,
+          );
         }
 
         if (event.layerApplied && event.layerApplied.length > 0) {
@@ -296,6 +307,12 @@ export default function Orchestra({
       releaseAll();
       return;
     }
+    if (!playableScore(scoreRef.current)) {
+      setNotice(
+        "Choose starting instruments and chords, then build your foundation first.",
+      );
+      return;
+    }
     busy.current = true;
     try {
       await orchestra.start();
@@ -311,25 +328,30 @@ export default function Orchestra({
   const toggleBuildMode = useCallback(
     (enable?: boolean) => {
       const next = enable !== undefined ? enable : !buildMode;
-      setBuildMode(next);
-      orchestra.setBuildMode(next);
-      setBuildupStage(0);
+      if (next === buildMode) return;
+      releaseAll();
+      orchestra.stop();
+      orchestra.autoEvolve = false;
+      orchestra.cancelQueuedWeave();
+      orchestra.setSolo(null);
+      setPlaying(false);
+      setEvolving(false);
+      setBuilding(false);
+      setProgress(0);
+      setStep(-1);
+      setCaptured([]);
+      setQueuedLayers([]);
+      setSolo(null);
+      // Modes keep independent saved work. Switching does not erase either one.
+      apply(initialScore(next ? "build" : "full"));
       setNotice(
         next
-          ? "Build mode active: instruments will enter cycle by cycle."
+          ? "Build from Nothing: choose your starting instruments and chords."
           : "Full orchestra active: all sections sounding in concert.",
       );
     },
-    [buildMode],
+    [buildMode, apply, releaseAll],
   );
-
-  const advanceStage = useCallback(() => {
-    if (orchestra.advanceBuildup()) {
-      setBuildupStage(orchestra.buildupStage);
-      const st = BUILDUP_STAGE_NAMES[orchestra.buildupStage];
-      setNotice(`Stage ${orchestra.buildupStage + 1}: ${st.entering} joined.`);
-    }
-  }, []);
 
   const select = (id: InstrumentId) => {
     if (selectedRef.current === id) return;
@@ -349,7 +371,11 @@ export default function Orchestra({
       orchestra.setSolo(null);
       orchestra.cancelQueuedWeave();
       setQueuedLayers([]);
-      const next = compose(
+      orchestra.stop();
+      orchestra.autoEvolve = false;
+      setPlaying(false);
+      setEvolving(false);
+      const next = (buildMode ? emptyScore : compose)(
         sceneId ?? scoreRef.current.scene,
         undefined,
         energy,
@@ -357,15 +383,41 @@ export default function Orchestra({
       apply(next);
       setNotice("A new movement begins. Take your seat.");
     },
-    [apply, energy, releaseAll],
+    [apply, energy, releaseAll, buildMode],
   );
 
   const toggleEvolution = useCallback(() => {
-    setEvolving((v) => {
-      orchestra.autoEvolve = !v;
-      return !v;
-    });
-  }, []);
+    if (!playableScore(scoreRef.current)) {
+      setNotice("Build your foundation before starting Auto-evolve.");
+      return;
+    }
+    orchestra.autoEvolve = !orchestra.autoEvolve;
+    setEvolving(orchestra.autoEvolve);
+    if (orchestra.autoEvolve && !orchestra.playing) void togglePlay();
+  }, [togglePlay]);
+
+  const buildStartingScore = (
+    instruments: InstrumentId[],
+    progression: number[],
+  ) => {
+    releaseAll();
+    orchestra.stop();
+    orchestra.autoEvolve = false;
+    orchestra.cancelQueuedWeave();
+    orchestra.setSolo(null);
+    setPlaying(false);
+    setEvolving(false);
+    setBuilding(false);
+    setProgress(0);
+    setStep(-1);
+    setCaptured([]);
+    setQueuedLayers([]);
+    setSolo(null);
+    apply(buildFoundation(scoreRef.current, instruments, progression));
+    setNotice(
+      "Foundation built. Press Play to listen, or Auto-evolve to grow the orchestra.",
+    );
+  };
 
   const build = useCallback(() => {
     if (!orchestra.playing) {
@@ -435,6 +487,12 @@ export default function Orchestra({
 
   // Eventual cycle weaving: queue for next cycle downbeat or immediate weave
   const weavePhrase = (immediate = false) => {
+    if (!playableScore(scoreRef.current)) {
+      setNotice(
+        "Build the foundation first, then weave your own phrases into it.",
+      );
+      return;
+    }
     if (!captured.length) return;
     if (score.parts[selected].layers >= MAX_LAYERS) {
       setNotice("Three layers are woven in. Undo one to add another.");
@@ -481,6 +539,10 @@ export default function Orchestra({
   };
 
   const toggleRecording = async () => {
+    if (!recording && !playableScore(scoreRef.current)) {
+      setNotice("Build your foundation before recording a performance.");
+      return;
+    }
     if (recording) {
       orchestra.stopRecording();
       setRecording(false);
@@ -569,7 +631,8 @@ export default function Orchestra({
             {buildMode ? (
               <span className="mode-tag build">
                 <Sparkles size={13} />
-                Build Mode · Stage {buildupStage + 1}/4
+                Build from Nothing · {activeInstruments(score).length}/8
+                sections
               </span>
             ) : (
               <span className="mode-tag full">
@@ -637,6 +700,7 @@ export default function Orchestra({
             className={`play-button ${playing ? "active" : ""}`}
             onClick={() => void togglePlay()}
             aria-label={playing ? "Stop orchestra" : "Play orchestra"}
+            disabled={!playableScore(score)}
           >
             {playing ? (
               <Square size={18} fill="currentColor" />
@@ -647,50 +711,43 @@ export default function Orchestra({
             <kbd>SPACE</kbd>
           </button>
 
-          {/* Sound Mode Switcher: Full Orchestra vs Build Sound Eventually */}
+          {/* Build-first studio, with Full Orchestra as a quick-start alternative. */}
           <div
             className="sound-mode-switcher"
             role="group"
             aria-label="Orchestral sound mode"
           >
             <button
-              className={`mode-btn ${!buildMode ? "active" : ""}`}
-              onClick={() => toggleBuildMode(false)}
-              aria-pressed={!buildMode}
-              title="Already created sound: all 8 sections play from bar 1"
-            >
-              <Music2 size={15} />
-              <span>Full Orchestra</span>
-            </button>
-            <button
               className={`mode-btn ${buildMode ? "active" : ""}`}
               onClick={() => toggleBuildMode(true)}
               aria-pressed={buildMode}
-              title="Build sound eventually: sections enter progressively across cycles"
+              title="Start with an empty score and build your own foundation"
             >
               <Sparkles size={15} />
-              <span>Build Eventually</span>
+              <span>Build from Nothing</span>
+            </button>
+            <button
+              className={`mode-btn ${!buildMode ? "active" : ""}`}
+              onClick={() => toggleBuildMode(false)}
+              aria-pressed={!buildMode}
+              title="Quick start: all 8 sections are arranged immediately"
+            >
+              <Music2 size={15} />
+              <span>Full Orchestra</span>
             </button>
 
             {buildMode && (
               <div className="buildup-tracker">
                 <span className="stage-name">
-                  Stage {buildupStage + 1}/4:{" "}
-                  {BUILDUP_STAGE_NAMES[buildupStage].name}
+                  {score.construction?.built
+                    ? `${activeInstruments(score).length}/8 sections in the score`
+                    : "Empty score · choose a foundation"}
                 </span>
                 <span className="stage-entering">
-                  ({BUILDUP_STAGE_NAMES[buildupStage].entering})
+                  {evolving
+                    ? "One new section every 2 bars"
+                    : "Auto-evolve is off"}
                 </span>
-                {buildupStage < BUILDUP_STAGES.length - 1 && (
-                  <button
-                    className="advance-stage-btn"
-                    onClick={advanceStage}
-                    title="Advance to next section entrance immediately"
-                  >
-                    <FastForward size={13} />
-                    Next Stage
-                  </button>
-                )}
               </div>
             )}
           </div>
@@ -736,7 +793,12 @@ export default function Orchestra({
             className={`control-button evolution ${evolving ? "enabled" : ""}`}
             onClick={toggleEvolution}
             aria-pressed={evolving}
-            title="Auto-evolve one section every 2 bars"
+            title={
+              buildMode
+                ? "Add one section every 2 bars, then evolve the full ensemble"
+                : "Auto-evolve one section every 2 bars"
+            }
+            disabled={!playableScore(score)}
           >
             <Sparkles size={16} />
             <span>Auto-evolve</span>
@@ -746,7 +808,7 @@ export default function Orchestra({
           <button
             className={`control-button crescendo ${building ? "enabled" : ""}`}
             onClick={build}
-            disabled={building}
+            disabled={building || !playableScore(score)}
             title="Trigger an orchestral crescendo build"
           >
             <Waves size={17} />
@@ -764,6 +826,7 @@ export default function Orchestra({
             className={`record-button ${recording ? "recording" : ""}`}
             onClick={() => void toggleRecording()}
             aria-label={recording ? "Save audio recording" : "Record audio"}
+            disabled={!recording && !playableScore(score)}
           >
             <Circle size={14} fill="currentColor" />
             <span>{recording ? "Save Audio" : "Record"}</span>
@@ -777,6 +840,14 @@ export default function Orchestra({
           onNew={() => newMovement()}
         />
 
+        {buildMode && (
+          <FoundationBuilder
+            key={`${score.scene}:${score.seed}`}
+            score={score}
+            onBuild={buildStartingScore}
+          />
+        )}
+
         {/* Working Studio Workspace */}
         <div className="workspace">
           {/* Arrangement Score */}
@@ -788,14 +859,19 @@ export default function Orchestra({
               <div>
                 <div className="eyebrow">THE WORKING SCORE</div>
                 <h2 id="arrangement-heading">
-                  Full Orchestra<span className="section-count">08</span>
+                  {buildMode ? "Your working score" : "Full Orchestra"}
+                  <span className="section-count">
+                    {String(activeInstruments(score).length).padStart(2, "0")}
+                  </span>
                 </h2>
               </div>
               <span className="bar-readout">
                 <span className={`status-light ${playing ? "live" : ""}`} />
                 {playing
                   ? `BAR ${Math.floor(step < 0 ? 0 : step / stepsPerBar(score)) + 1} OF ${BARS}`
-                  : "READY AT THE PODIUM"}
+                  : !playableScore(score)
+                    ? "EMPTY SCORE · BUILD YOUR FOUNDATION"
+                    : "READY TO PLAY"}
               </span>
             </div>
 
@@ -870,6 +946,13 @@ export default function Orchestra({
                       aria-label={`Select ${inst.name} score`}
                     >
                       <span className="bar-grid" />
+                      {!track.notes.length && (
+                        <span className="empty-track-label">
+                          {score.construction?.built
+                            ? "WAITING FOR AUTO-EVOLVE"
+                            : "EMPTY"}
+                        </span>
+                      )}
                       {track.notes.map((note, i) => (
                         <i
                           key={i}
@@ -1158,7 +1241,11 @@ export default function Orchestra({
                 <button
                   className="weave-button"
                   onClick={() => weavePhrase(false)}
-                  disabled={!captured.length || part.layers >= MAX_LAYERS}
+                  disabled={
+                    !playableScore(score) ||
+                    !captured.length ||
+                    part.layers >= MAX_LAYERS
+                  }
                   title="Queue phrase to enter musically at the start of the next cycle"
                 >
                   <Sparkles size={16} />
@@ -1168,15 +1255,17 @@ export default function Orchestra({
                   <ArrowUpRight size={17} />
                 </button>
 
-                {captured.length > 0 && part.layers < MAX_LAYERS && (
-                  <button
-                    className="weave-now-button"
-                    onClick={() => weavePhrase(true)}
-                    title="Weave phrase immediately into the score"
-                  >
-                    Weave Now
-                  </button>
-                )}
+                {playableScore(score) &&
+                  captured.length > 0 &&
+                  part.layers < MAX_LAYERS && (
+                    <button
+                      className="weave-now-button"
+                      onClick={() => weavePhrase(true)}
+                      title="Weave phrase immediately into the score"
+                    >
+                      Weave Now
+                    </button>
+                  )}
 
                 <button
                   className="undo-button"
@@ -1307,20 +1396,20 @@ export default function Orchestra({
             </button>
             <ol>
               <li>
-                <strong>Start Full or Build Eventually.</strong> Choose{" "}
-                <em>Full Orchestra</em> for immediate symphonic splendor, or{" "}
-                <em>Build Eventually</em> to hear sections enter cycle by cycle
-                into a grand ensemble.
+                <strong>Build from Nothing.</strong> Choose starting instruments
+                and one chord per bar, then Build foundation. Only those parts
+                appear. Full Orchestra is a separate quick-start option.
               </li>
               <li>
-                <strong>Conduct a movement.</strong> Press Space or Play. Browse
-                the 12 scenes to explore Ballet, Classical, Folk, or Cinematic
-                worlds.
+                <strong>Grow the ensemble.</strong> Press Play to hear your
+                foundation, then Auto-evolve to add one section every two bars.
+                Turn it off to keep the current ensemble. Browse the 12 scenes
+                to explore Ballet, Classical, Folk, or Cinematic worlds.
               </li>
               <li>
-                <strong>Take an instrument.</strong> Click any section on stage
-                or in the score, then play keys A–K. Every pad is tuned to the
-                movement’s scale.
+                <strong>Take an instrument.</strong> Select a section in the
+                score or live instrument picker, then play keys A–K. Every pad
+                is tuned to the movement’s scale.
               </li>
               <li>
                 <strong>Weave phrases in eventual cycles.</strong> Play notes on

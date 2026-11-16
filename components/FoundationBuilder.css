@@ -1,0 +1,149 @@
+.foundation-builder {
+  margin: 28px 0 20px;
+  padding: 25px;
+  border: 1px solid var(--border, #c9caba);
+  background: #f4f2e8;
+  border-radius: 7px;
+}
+.foundation-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.foundation-heading h2 {
+  margin: 5px 0 0;
+  font:
+    30px/1.2 "Cormorant Garamond",
+    Georgia,
+    serif;
+}
+.foundation-count {
+  color: #68745c;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.foundation-builder > p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #69735f;
+  max-width: 800px;
+  margin: 12px 0 20px;
+}
+.foundation-builder fieldset {
+  margin: 0 0 20px;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.foundation-builder legend {
+  font-size: 11px;
+  font-weight: 600;
+  color: #566249;
+  margin-bottom: 12px;
+}
+.foundation-instruments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.foundation-instruments button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  border: 1px solid #c7cabb;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  background: #eeefe4;
+  color: #606d51;
+}
+.foundation-instruments button[aria-pressed="true"] {
+  background: #dce4d0;
+  border-color: #879b70;
+  color: #35452c;
+}
+.foundation-chords {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 8px;
+}
+.foundation-chords label {
+  min-width: 0;
+}
+.foundation-chords label > span {
+  display: block;
+  font-size: 9px;
+  color: #747e67;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.foundation-chords select {
+  font: inherit;
+  font-size: 14px;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px;
+  color: #3f5036;
+  background: #f8f7ef;
+  border: 1px solid #bcc4ae;
+  border-radius: 4px;
+}
+.foundation-chords select:focus-visible {
+  outline: 2px solid #8e9c71;
+  outline-offset: 3px;
+}
+.foundation-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.build-foundation {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 44px;
+  padding: 12px 19px;
+  border-radius: 4px;
+  background: #536847;
+  color: #fffdf4;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.build-foundation:hover:not(:disabled) {
+  background: #405536;
+}
+.foundation-actions small {
+  font-size: 10px;
+  line-height: 1.6;
+  color: #707b62;
+}
+.empty-track-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+  color: #889078;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+}
+@media (max-width: 700px) {
+  .foundation-builder {
+    padding: 18px;
+  }
+  .foundation-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .foundation-chords {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .foundation-actions {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+}

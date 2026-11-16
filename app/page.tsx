@@ -344,21 +344,69 @@ export default function LandingPage() {
             />
 
             {/* Instrument Section Nodes */}
-            <circle cx="430" cy="340" r="3.5" fill="#f59e0b" fillOpacity="0.75" />
+            <circle
+              cx="430"
+              cy="340"
+              r="3.5"
+              fill="#f59e0b"
+              fillOpacity="0.75"
+            />
             <circle cx="465" cy="332" r="3" fill="#f59e0b" fillOpacity="0.75" />
             <circle cx="500" cy="330" r="3" fill="#f59e0b" fillOpacity="0.75" />
             <circle cx="535" cy="332" r="3" fill="#06b6d4" fillOpacity="0.75" />
-            <circle cx="570" cy="340" r="3.5" fill="#06b6d4" fillOpacity="0.75" />
+            <circle
+              cx="570"
+              cy="340"
+              r="3.5"
+              fill="#06b6d4"
+              fillOpacity="0.75"
+            />
 
-            <circle cx="360" cy="275" r="3.5" fill="#10b981" fillOpacity="0.7" />
-            <circle cx="425" cy="250" r="3.5" fill="#10b981" fillOpacity="0.7" />
-            <circle cx="500" cy="240" r="3.5" fill="#10b981" fillOpacity="0.7" />
-            <circle cx="575" cy="250" r="3.5" fill="#ec4899" fillOpacity="0.7" />
-            <circle cx="640" cy="275" r="3.5" fill="#ec4899" fillOpacity="0.7" />
+            <circle
+              cx="360"
+              cy="275"
+              r="3.5"
+              fill="#10b981"
+              fillOpacity="0.7"
+            />
+            <circle
+              cx="425"
+              cy="250"
+              r="3.5"
+              fill="#10b981"
+              fillOpacity="0.7"
+            />
+            <circle
+              cx="500"
+              cy="240"
+              r="3.5"
+              fill="#10b981"
+              fillOpacity="0.7"
+            />
+            <circle
+              cx="575"
+              cy="250"
+              r="3.5"
+              fill="#ec4899"
+              fillOpacity="0.7"
+            />
+            <circle
+              cx="640"
+              cy="275"
+              r="3.5"
+              fill="#ec4899"
+              fillOpacity="0.7"
+            />
 
             <circle cx="270" cy="210" r="4" fill="#eab308" fillOpacity="0.7" />
             <circle cx="370" cy="175" r="4" fill="#eab308" fillOpacity="0.7" />
-            <circle cx="500" cy="160" r="4.5" fill="#ef4444" fillOpacity="0.8" />
+            <circle
+              cx="500"
+              cy="160"
+              r="4.5"
+              fill="#ef4444"
+              fillOpacity="0.8"
+            />
             <circle cx="630" cy="175" r="4" fill="#eab308" fillOpacity="0.7" />
             <circle cx="730" cy="210" r="4" fill="#8b5cf6" fillOpacity="0.7" />
 
@@ -393,10 +441,28 @@ export default function LandingPage() {
 
         {/* Dual Mode Entry Doors */}
         <div className="subtle-start-grid">
-          <Link href="/studio?mode=full" className="subtle-card">
+          <Link href="/studio?mode=build" className="subtle-card">
             <div className="card-topline">
               <span className="subtle-badge">
-                <Music2 size={12} /> COMPLETE ENSEMBLE
+                <Sparkles size={12} /> START FROM NOTHING · RECOMMENDED
+              </span>
+              <span className="card-arrow">
+                <ArrowRight size={16} />
+              </span>
+            </div>
+            <h3>Build from Nothing</h3>
+            <p>
+              Begin with an empty score. Choose your starting instruments and
+              chords, build a foundation, then let Auto-evolve grow the
+              ensemble.
+            </p>
+            <span className="subtle-card-action">Build your foundation →</span>
+          </Link>
+
+          <Link href="/studio?mode=full" className="subtle-card">
+            <div className="card-topline">
+              <span className="subtle-badge accent">
+                <Music2 size={12} /> QUICK START
               </span>
               <span className="card-arrow">
                 <ArrowRight size={16} />
@@ -404,27 +470,12 @@ export default function LandingPage() {
             </div>
             <h3>Full Orchestra</h3>
             <p>
-              Experience all eight sections in concert harmony immediately. Play
-              along with in-key pads and sculpt the mix in real time.
+              Start with all eight sections already arranged. Play along with
+              in-key pads and shape a complete ensemble straight away.
             </p>
-            <span className="subtle-card-action">Launch Full Orchestra →</span>
-          </Link>
-
-          <Link href="/studio?mode=build" className="subtle-card">
-            <div className="card-topline">
-              <span className="subtle-badge accent">
-                <Sparkles size={12} /> PROGRESSIVE BUILDUP
-              </span>
-              <span className="card-arrow">
-                <ArrowRight size={16} />
-              </span>
-            </div>
-            <h3>Build the Symphony</h3>
-            <p>
-              Begin with an intimate acoustic foundation. Watch instrument
-              families enter cycle by cycle into a grand orchestral climax.
-            </p>
-            <span className="subtle-card-action">Build Step-by-Step →</span>
+            <span className="subtle-card-action">
+              Quick start full orchestra →
+            </span>
           </Link>
         </div>
       </main>

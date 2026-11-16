@@ -1,5 +1,9 @@
 export const TOUR_STORAGE_KEY = "symphone.tour.v1";
-const SCORE_KEYS = ["symphone.score.v1", "symphone.legacy.score.v1"];
+const SCORE_KEYS = [
+  "symphone.score.v1",
+  "symphone.legacy.score.v1",
+  "symphone.build.score.v1",
+];
 type TourStorage = Pick<Storage, "getItem" | "setItem">;
 
 export function browserTourStorage(): TourStorage | undefined {
@@ -46,42 +50,42 @@ export const TOUR_STEPS = [
     id: "entrance",
     target: ".orchestra-start-cards, .sound-mode-switcher",
     title: "Choose your entrance.",
-    body: "Full Orchestra brings in all eight sections straight away. Build Eventually begins with cellos and atmosphere; more sections join each cycle. Next Stage lets you bring them in sooner.",
-    tip: "Start with Full Orchestra for your first listen. Or choose Build Eventually to hear the ensemble grow.",
+    body: "Build from Nothing is the default: your score begins empty until you choose instruments and chords and build a foundation. Full Orchestra is a quick-start alternative with all eight parts ready.",
+    tip: "Start with Build from Nothing to compose your own foundation. The two modes save their scores separately, so switching modes preserves your saved work.",
   },
   {
     id: "scenes",
     target: ".scene-library",
     title: "Set the musical scene.",
-    body: "Scenes shape the harmony, tempo, rhythm and instrument balance. Use the family filters to explore ballet, classical, folk and cinematic styles.",
+    body: "Scenes set the scale, tempo, rhythm and instrument balance. In Build from Nothing, choosing a scene leaves the score empty; you choose its chord progression in the foundation panel.",
     tip: "Try Ballet & classical → British ballet for a light 3/4 sway. Changing scenes or choosing New movement clears your phrases and starts a fresh score.",
   },
   {
-    id: "stage",
-    target: "#conductor-podium, [aria-label='Orchestra seating map']",
-    title: "Take a seat on stage.",
-    body: "Select a section on the miniature stage or use its labeled section buttons. The stage follows playback and your live notes. Seating plan switches to a flat view; Motion on can be turned off.",
-    tip: "Select Violins to start. Choosing a section changes the instrument you play, not the rest of the ensemble.",
+    id: "foundation",
+    target: ".foundation-builder, .sound-mode-switcher",
+    title: "Choose the first voices and chords.",
+    body: "In Build from Nothing, select one or more starting instruments and one chord for each of the eight bars. Build foundation writes only those instrument parts into the score. Other rows remain empty.",
+    tip: "Try Cellos and Harp, pick your chords, then Build foundation. If you are in Full Orchestra, switch to Build from Nothing to reveal these controls.",
   },
   {
     id: "playback",
     target: ".play-button",
     title: "Let the orchestra play.",
     body: "Play Orchestra starts the repeating eight-bar movement. Stop pauses the performance; Play starts again from bar one. The nearby BPM control changes speed and the key display shows the scene’s scale and meter.",
-    tip: "Press Play Orchestra when you’re ready to listen. Sound only starts after your interaction; samples may take a moment to load.",
+    tip: "Build your foundation first, then press Play Orchestra. Only the parts currently in the score play; other instruments wait until you turn on Auto-evolve.",
   },
   {
     id: "score",
     target: ".score",
     title: "Follow the working score.",
     body: "Each row is an instrument; the small marks show its notes across eight bars. The moving line follows the performance. Select a row to play that section, or use its speaker button to mute it.",
-    tip: "Try muting Analog pulse to hear a more acoustic ensemble. Click its speaker again to bring it back.",
+    tip: "Empty rows are really empty—not hidden arrangements. After building, watch a waiting row gain notes each time Auto-evolve introduces a new section.",
   },
   {
     id: "instrument",
     target: ".instrument-picker",
     title: "Choose your voice.",
-    body: "These eight instrument buttons select your live voice: violins, cellos, flute, horns, harp, timpani and two electronic sections. They select the same sections as the stage and score.",
+    body: "These eight buttons select the instrument you play live. This is different from choosing the starting instruments in your foundation: switching live voices does not generate new score parts.",
     tip: "Try Harp for a plucked sound, then return to Violins. Switching instruments clears notes you haven’t woven yet.",
   },
   {
@@ -96,7 +100,7 @@ export const TOUR_STEPS = [
     target: ".phrase-area",
     title: "Give your phrase to the ensemble.",
     body: "Queue Phrase for Next Cycle lets your notes join at the next eight-bar downbeat while playing. Weave Now adds them immediately; when stopped, the queue button weaves and starts playback. Up to 16 notes fit in a two-bar phrase, repeated across the movement.",
-    tip: "Play a few pads first, then queue the phrase. The first layer replaces that section’s generated notes; stack up to three. Undo removes the latest woven layer.",
+    tip: "Build your foundation first, then play a few pads and queue the phrase. The first layer replaces that section’s generated notes; stack up to three. Undo removes the latest woven layer.",
   },
   {
     id: "mix",
@@ -109,8 +113,8 @@ export const TOUR_STEPS = [
     id: "movement",
     target: ".transport",
     title: "Keep the music moving.",
-    body: "Auto-evolve rewrites one eligible section every two bars, leaving your woven phrases alone. Crescendo briefly builds tension with percussion and a rising swell, then returns the ensemble on bar one.",
-    tip: "While the orchestra plays, try Auto-evolve, then Crescendo. These are separate from Build Eventually, which brings sections in progressively.",
+    body: "In Build from Nothing, Auto-evolve adds one new instrument every two bars, following your chosen chords. Once all sections have joined, it varies eligible generated parts while leaving woven phrases alone.",
+    tip: "Click Auto-evolve after building to start playback and grow the orchestra. Turn it off to keep the current ensemble. Crescendo is a separate, temporary tension-and-release effect.",
   },
   {
     id: "save",

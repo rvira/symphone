@@ -12,27 +12,29 @@ npm ci
 npm run dev
 ```
 
-Open the local URL printed by Vite. Press **Play orchestra**, then use **A S D F G H J K** to play the selected instrument. Audio starts only after an interaction, as required by browsers. No account, API key, server or paid service is required.
+Open the local URL printed by Next.js. Choose **Build from Nothing** to begin with an empty score, or **Full Orchestra** for a ready-made arrangement. Audio starts only after an interaction, as required by browsers. No account, API key or paid service is required.
 
 ```sh
 npm test       # Musical and timing invariants
-npm run build # Type-check and generate dist/
-npm run preview
+npm run build # Type-check and generate the Next.js production build
+npm start
 ```
 
 ## Play
 
-- **Concert hall landing:** Step onto the podium with two entry paths: **Enter with Full Orchestra** for immediate, lush symphonic arrangement, or **Build the Symphony** to start with an intimate foundation and hear sections enter cycle by cycle into a grand ensemble.
-- **Sound modes:** Toggle between **Full Orchestra** (all 8 sections active from bar one) and **Build Eventually** (progressive entry across musical cycles: Foundation → Motion & Pluck → Melodic Rise → Grand Ensemble).
+- **Build from Nothing (default):** The working score starts with all eight rows genuinely empty. Choose one or more starting instruments and one diatonic chord per bar, then click **Build foundation**. Only those selected parts are generated. Press Play to listen, or Auto-evolve to start playback and grow the ensemble. Rebuilding replaces existing parts and woven phrases; it does not start audio automatically.
+- **Full Orchestra (quick start):** All eight sections are generated immediately. This remains a separate entry path for instant listening and playing along. The two modes keep independent saved scores on this device; returning players can resume their work.
 - **Eventual cycle phrase weaving:** Use keys A–K or tap on-screen pads to capture notes. Clicking **Queue Layer for Next Cycle** queues your phrase to enter smoothly on the next cycle downbeat, matching authentic orchestral performance practice. An instant **Weave Now** option is also available.
-- **Choose a scene:** Browse 12 musical worlds, filtered by Ballet & classical, Folk or Cinematic. Each starts an original eight-bar orchestration with its own harmony, melodic rhythm, tempo and instrument balance.
-- **Take in the stage:** The 3D concert hall stage shows the orchestra with chairs, music stands, instruments and a conductor whose gestures follow the music. Select Still view or Seating plan for alternative perspectives.
-- **Auto-evolve:** One eligible section is regenerated every two bars while preserving your phrases.
+- **Choose a scene:** Browse 12 musical worlds, filtered by Ballet & classical, Folk or Cinematic. Scenes set the scale, meter, melodic style, tempo and instrument balance. In Build from Nothing they reset to an empty score with suggested chords; no parts are generated until Build.
+- **Podium:** The original 3D stage follows the score and live playing. The score and live instrument picker offer the same section selections.
+- **Auto-evolve:** In Build from Nothing, one new instrument part is composed every two bars using your chosen chords. Existing parts stay unchanged while the ensemble grows. Once all eight have joined, it varies eligible generated parts. Woven phrases and mix settings are preserved throughout. Turning Auto-evolve off freezes growth; Stop/Play never resets the assembled parts. Intensity does not fill empty rows.
 - **Crescendo:** Builds tension through the bar, drops low end, accelerates percussion, and resolves on bar one with an orchestral impact.
 - **Mix & acoustics:** Solo sections, adjust levels, change tempo, control intensity and adjust concert-hall reverb depth.
 - **Record:** Captures the complete browser audio mix into WebM/Opus or M4A without using your microphone.
 
 Switching scenes or choosing New movement creates a fresh score, clears custom phrases and returns to bar one. Clear removes uncommitted pad notes; Undo removes a woven layer. Space toggles playback. Escape closes the guide and releases held notes.
+
+Build mode saves to `symphone.build.score.v1`; Full Orchestra continues to use `symphone.score.v1`. Old complete arrangements are not loaded into a new build-mode score. Your chord progression is stored with the score and reused for evolution, intensity changes and restoring generated parts after Undo. Each chord applies to one bar of the eight-bar movement.
 
 ## Scene library
 
@@ -54,10 +56,13 @@ Synthesized fallback voices play immediately and remain available if samples fai
 
 ```text
 app/
-  main.tsx                 React entry point
+  layout.tsx               Next.js layout and metadata
+  page.tsx                 Landing page with build-first and quick-start paths
+  studio/page.tsx          Studio entry; defaults to Build from Nothing
   globals.css              Responsive studio design
 components/
   Orchestra.tsx            UI, keyboard input, state and persistence
+  FoundationBuilder.tsx    Starting instruments, eight chord selectors and Build
   SceneLibrary.tsx         Filterable scene cards and movement descriptions
   Ensemble.tsx             Interactive orchestra seating map
   Stage3D.tsx              Lazy-loaded stage and WebGL fallback lifecycle
@@ -76,11 +81,11 @@ docs/DESIGN.md              Concert-hall references, palette and motion choices
 
 `Score` is plain data: eight instrument parts with MIDI notes, step positions, durations, velocities and mix settings. The UI sends edited scores into the engine. The engine indexes notes by step, schedules roughly 100 ms ahead on the audio clock, and sends timestamped playback events back to the UI. Bars have sixteen sixteenth-note steps in 4/4, or twelve in 3/4 and 6/8. A movement has 128 or 96 steps. Timing helpers in `lib/score.ts` keep consumers in sync; 6/8 groups six subdivisions per dotted-quarter beat.
 
-The composer shares one harmonic progression across the ensemble, then gives each instrument its own role: motif, bass foundation, answering phrase, chord voicing, arpeggio, percussion pattern, synth pulse or sustained texture. Seeded choices make arrangements reproducible. Every section has variation across seeds. Evolution replaces a section’s notes; a crescendo changes playback temporarily.
+The composer shares one harmonic progression across the ensemble, then gives each instrument its own role: motif, bass foundation, answering phrase, chord voicing, arpeggio, percussion pattern, synth pulse or sustained texture. Seeded choices make arrangements reproducible. Build-mode evolution first creates a missing section, then varies existing generated notes once the ensemble is complete. A crescendo changes playback temporarily.
 
 ## Git history and reference
 
-The first commit, `87ad296`, contains **only the repository scaffold and folder layout**. The playable implementation is a separate later commit. This is a new local Git repository on `main`; no remote has been created or configured.
+The first commit contains **only the repository scaffold and folder layout**. The playable implementation is a separate later commit. The repository is published at [rvira/symphone](https://github.com/rvira/symphone).
 
 KHAOS informed the broad interaction pattern: a safe musical scale, generative accompaniment, evolving parts and a build/release gesture. No KHAOS source files were copied. Symphone has its own score model, orchestration algorithms, timed phrase capture, audio engine and interface. The shared third-party audio dependency is `smplr`.
 

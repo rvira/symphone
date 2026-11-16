@@ -461,7 +461,43 @@ export type Score = {
   energy: number;
   parts: Record<InstrumentId, Part>;
   generation: number;
+  progression?: number[];
+  construction?: { startingInstruments: InstrumentId[]; built: boolean };
 };
+export const EVOLUTION_ORDER: readonly InstrumentId[] = [
+  "cello",
+  "harp",
+  "pulse",
+  "strings",
+  "woodwinds",
+  "percussion",
+  "brass",
+  "texture",
+];
+export const activeInstruments = (score: Score) =>
+  INSTRUMENTS.filter((i) => score.parts[i.id].notes.length > 0).map(
+    (i) => i.id,
+  );
+export const playableScore = (score: Score) =>
+  (!score.construction || score.construction.built) &&
+  activeInstruments(score).length > 0;
+export const sceneForScore = (score: Score): Scene => ({
+  ...sceneFor(score.scene),
+  progression: score.progression ?? sceneFor(score.scene).progression,
+});
+export function validProgression(value: unknown): value is number[] {
+  return (
+    Array.isArray(value) &&
+    value.length === BARS &&
+    value.every((d) => Number.isInteger(d) && d >= 0 && d < 7)
+  );
+}
+export function chordLabel(scene: Scene, degree: number) {
+  const root = degreeMidi(scene, degree),
+    third = degreeMidi(scene, degree + 2) - root,
+    fifth = degreeMidi(scene, degree + 4) - root;
+  return noteName(root) + (fifth === 6 ? "dim" : third === 3 ? "m" : "");
+}
 export type CapturedNote = { midi: number; time: number };
 export const sceneFor = (id: SceneId): Scene =>
   SCENES.find((s) => s.id === id)!;
@@ -841,19 +877,42 @@ export function compose(
   sceneId: SceneId = "horizon",
   seed = randomSeed(),
   energy = 0.58,
+  options: {
+    startingInstruments?: readonly InstrumentId[];
+    progression?: readonly number[];
+    empty?: boolean;
+  } = {},
 ): Score {
-  const scene = sceneFor(sceneId);
+  if (options.progression && !validProgression(options.progression))
+    throw new Error("Choose one diatonic chord for each of the eight bars.");
+  const scene: Scene = {
+    ...sceneFor(sceneId),
+    progression: options.progression ?? sceneFor(sceneId).progression,
+  };
+  const starting = options.startingInstruments;
   return {
     seed,
     scene: sceneId,
     bpm: scene.bpm,
     energy,
     generation: 0,
+    progression: [...scene.progression],
+    ...(starting
+      ? {
+          construction: {
+            startingInstruments: [...new Set(starting)],
+            built: !options.empty,
+          },
+        }
+      : {}),
     parts: Object.fromEntries(
       INSTRUMENTS.map((inst, i) => [
         inst.id,
         {
-          notes: generatePart(inst.id, scene, seed + i * 7919, energy),
+          notes:
+            options.empty || (starting && !starting.includes(inst.id))
+              ? []
+              : generatePart(inst.id, scene, seed + i * 7919, energy),
           muted: false,
           volume:
             scene.mix?.[inst.id] ??
@@ -865,8 +924,77 @@ export function compose(
   };
 }
 
+export const emptyScore = (
+  sceneId: SceneId = "horizon",
+  seed = randomSeed(),
+  energy = 0.58,
+) => compose(sceneId, seed, energy, { startingInstruments: [], empty: true });
+
+export function buildFoundation(
+  score: Score,
+  instruments: readonly InstrumentId[],
+  progression: readonly number[],
+): Score {
+  if (
+    !instruments.length ||
+    instruments.some((id) => !INSTRUMENTS.some((i) => i.id === id))
+  )
+    throw new Error("Choose at least one starting instrument.");
+  const built = compose(score.scene, score.seed, score.energy, {
+    startingInstruments: instruments,
+    progression,
+  });
+  return {
+    ...built,
+    bpm: score.bpm,
+    parts: Object.fromEntries(
+      INSTRUMENTS.map((i) => [
+        i.id,
+        {
+          ...built.parts[i.id],
+          volume: score.parts[i.id].volume,
+          muted: score.parts[i.id].muted,
+        },
+      ]),
+    ) as Score["parts"],
+  };
+}
+
+// Called by the audio clock, not a UI timer. Turning Auto-evolve off really
+// stops entrances; stopping/restarting playback never resets the arrangement.
+export const evolveAtBoundary = (
+  score: Score,
+  absoluteStep: number,
+  enabled: boolean,
+): Score =>
+  enabled && absoluteStep > 0 && absoluteStep % (stepsPerBar(score) * 2) === 0
+    ? evolve(score)
+    : score;
+
 export function evolve(score: Score): Score {
+  if (score.construction && !score.construction.built) return score;
   const generation = score.generation + 1;
+  const entering =
+    score.construction &&
+    EVOLUTION_ORDER.find((id) => !score.parts[id].notes.length);
+  if (entering) {
+    return {
+      ...score,
+      generation,
+      parts: {
+        ...score.parts,
+        [entering]: {
+          ...score.parts[entering],
+          notes: generatePart(
+            entering,
+            sceneForScore(score),
+            score.seed + generation * 8191,
+            score.energy,
+          ),
+        },
+      },
+    };
+  }
   const available = INSTRUMENTS.filter((i) => score.parts[i.id].layers === 0);
   if (!available.length) return score;
   const r = random(score.seed + generation * 104729);
@@ -880,7 +1008,7 @@ export function evolve(score: Score): Score {
         ...score.parts[id],
         notes: generatePart(
           id,
-          sceneFor(score.scene),
+          sceneForScore(score),
           score.seed + generation * 8191,
           score.energy,
         ),
@@ -896,6 +1024,7 @@ export function weave(
   id: InstrumentId,
   captured: CapturedNote[],
 ): Score {
+  if (score.construction && !score.construction.built) return score;
   if (!captured.length || score.parts[id].layers >= MAX_LAYERS) return score;
   const part = score.parts[id],
     layer = part.layers + 1;
@@ -944,7 +1073,7 @@ export function undoLayer(score: Score, id: InstrumentId): Score {
     ? part.notes.filter((n) => n.layer !== part.layers)
     : generatePart(
         id,
-        sceneFor(score.scene),
+        sceneForScore(score),
         score.seed + INSTRUMENTS.findIndex((i) => i.id === id) * 7919,
         score.energy,
       );
@@ -963,14 +1092,16 @@ export function reorchestrate(score: Score, energy: number): Score {
         inst.id,
         {
           ...score.parts[inst.id],
-          notes: score.parts[inst.id].layers
-            ? score.parts[inst.id].notes
-            : generatePart(
-                inst.id,
-                sceneFor(score.scene),
-                score.seed + i * 7919,
-                energy,
-              ),
+          notes:
+            score.parts[inst.id].layers ||
+            (score.construction && !score.parts[inst.id].notes.length)
+              ? score.parts[inst.id].notes
+              : generatePart(
+                  inst.id,
+                  sceneForScore(score),
+                  score.seed + i * 7919,
+                  energy,
+                ),
         },
       ]),
     ) as Score["parts"],
