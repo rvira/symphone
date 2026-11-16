@@ -22,16 +22,15 @@ npm run preview
 
 ## Play
 
-- **Choose a scene:** browse 12 musical worlds, filtered by Ballet & classical, Folk or Cinematic. Each starts an original eight-bar orchestration with its own harmony, melodic rhythm, tempo and instrument balance. See the scene library below.
-- **Choose a section:** violins, cellos, flute, French horns, harp, timpani, analog pulse, or atmosphere. Click the score, seating map or instrument selector.
-- **Take in the stage:** the original 3D miniature shows the orchestra with chairs, music stands, instruments and a conductor. Its gestures follow the music. Select Still view to stop stage motion, or Seating plan for a flat diagram. Device reduced-motion preferences are respected automatically.
-- **Play pads:** use A–K or hold the on-screen pads. All eight notes belong to the selected scale.
-- **Weave a phrase:** up to 16 played pitches and their relative onset times become a quantized two-bar phrase repeated through the movement. The first layer replaces that section’s generated part; up to three layers can be stacked. Notes beyond the two-bar capture window are omitted. Undo removes the newest layer and restores the generated part when the final layer is removed.
-- **Auto-evolve:** one eligible section is regenerated every two bars. Sections containing your phrases are preserved.
-- **Crescendo:** while playing, builds through the remainder of a bar and the next full bar. Bass sections step out, percussion accelerates, a noise riser swells, and the low end is filtered away. The ensemble returns on bar one with an impact.
-- **Mix:** mute sections, solo the selected section, adjust its level, change tempo, increase intensity or add concert-hall reverb. Intensity rewrites generated parts and preserves user phrases.
-- **Record:** captures the complete audio mix, including live playing. Save audio downloads a WebM/Opus file (M4A in browsers that only support MP4 audio). It does not use your microphone.
-- **Keep a score:** the arrangement is saved in local storage. Export score downloads the score data as JSON; this version does not import JSON or export MIDI.
+- **Concert hall landing:** Step onto the podium with two entry paths: **Enter with Full Orchestra** for immediate, lush symphonic arrangement, or **Build the Symphony** to start with an intimate foundation and hear sections enter cycle by cycle into a grand ensemble.
+- **Sound modes:** Toggle between **Full Orchestra** (all 8 sections active from bar one) and **Build Eventually** (progressive entry across musical cycles: Foundation → Motion & Pluck → Melodic Rise → Grand Ensemble).
+- **Eventual cycle phrase weaving:** Use keys A–K or tap on-screen pads to capture notes. Clicking **Queue Layer for Next Cycle** queues your phrase to enter smoothly on the next cycle downbeat, matching authentic orchestral performance practice. An instant **Weave Now** option is also available.
+- **Choose a scene:** Browse 12 musical worlds, filtered by Ballet & classical, Folk or Cinematic. Each starts an original eight-bar orchestration with its own harmony, melodic rhythm, tempo and instrument balance.
+- **Take in the stage:** The 3D concert hall stage shows the orchestra with chairs, music stands, instruments and a conductor whose gestures follow the music. Select Still view or Seating plan for alternative perspectives.
+- **Auto-evolve:** One eligible section is regenerated every two bars while preserving your phrases.
+- **Crescendo:** Builds tension through the bar, drops low end, accelerates percussion, and resolves on bar one with an orchestral impact.
+- **Mix & acoustics:** Solo sections, adjust levels, change tempo, control intensity and adjust concert-hall reverb depth.
+- **Record:** Captures the complete browser audio mix into WebM/Opus or M4A without using your microphone.
 
 Switching scenes or choosing New movement creates a fresh score, clears custom phrases and returns to bar one. Clear removes uncommitted pad notes; Undo removes a woven layer. Space toggles playback. Escape closes the guide and releases held notes.
 
@@ -85,4 +84,4 @@ The first commit, `87ad296`, contains **only the repository scaffold and folder 
 
 KHAOS informed the broad interaction pattern: a safe musical scale, generative accompaniment, evolving parts and a build/release gesture. No KHAOS source files were copied. Symphone has its own score model, orchestration algorithms, timed phrase capture, audio engine and interface. The shared third-party audio dependency is `smplr`.
 
-The repository was initially named Tutti. The Symphone rename preserves Git history and reads existing Tutti sessions from this browser before saving them under the new name.
+Symphone has its own score model, orchestration algorithms, timed phrase capture, audio engine and interface. The shared third-party audio dependency is `smplr`.

@@ -15,7 +15,11 @@ import {
   undoLayer,
   weave,
 } from "../lib/score";
-import { crescendoLength } from "../lib/audio";
+import {
+  crescendoLength,
+  BUILDUP_STAGES,
+  BUILDUP_STAGE_NAMES,
+} from "../lib/audio";
 
 test("all scenes produce deterministic, bounded, in-key eight-bar scores", () => {
   for (const scene of SCENES)
@@ -230,4 +234,30 @@ test("new scenes change orchestration, rhythm and mix rather than only the key",
   assert.ok(
     jig.parts.pulse.volume < compose("momentum", 314).parts.pulse.volume,
   );
+});
+
+test("buildup stages progressively accumulate instruments until the full ensemble", () => {
+  assert.equal(BUILDUP_STAGES.length, BUILDUP_STAGE_NAMES.length);
+  assert.equal(BUILDUP_STAGES.length, 4);
+
+  // Each stage strictly includes all instruments from the previous stage
+  for (let i = 1; i < BUILDUP_STAGES.length; i++) {
+    for (const inst of BUILDUP_STAGES[i - 1]) {
+      assert.ok(
+        BUILDUP_STAGES[i].includes(inst),
+        `Stage ${i} must include all instruments from stage ${i - 1}`,
+      );
+    }
+    assert.ok(
+      BUILDUP_STAGES[i].length > BUILDUP_STAGES[i - 1].length,
+      `Stage ${i} should introduce more instruments than stage ${i - 1}`,
+    );
+  }
+
+  // The final stage must cover all 8 instruments
+  const finalStage = BUILDUP_STAGES[BUILDUP_STAGES.length - 1];
+  assert.equal(finalStage.length, INSTRUMENTS.length);
+  for (const inst of INSTRUMENTS) {
+    assert.ok(finalStage.includes(inst.id));
+  }
 });
