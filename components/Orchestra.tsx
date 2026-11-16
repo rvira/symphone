@@ -56,7 +56,8 @@ import {
   type Score,
 } from "../lib/score";
 import InstrumentGlyph from "./InstrumentGlyph";
-import Ensemble from "./Ensemble";
+// Podium visualization is temporarily disabled; retain its implementation.
+// import Ensemble from "./Ensemble";
 import FoundationBuilder from "./FoundationBuilder";
 import SceneLibrary from "./SceneLibrary";
 import GuidedTour from "./GuidedTour";
@@ -661,7 +662,7 @@ export default function Orchestra({
       </header>
 
       <main>
-        {/* The Conductor's Podium & 3D Stage */}
+        {/* The Conductor's Podium & 3D Stage — temporarily disabled.
         <section
           id="conductor-podium"
           className="podium-section"
@@ -693,6 +694,8 @@ export default function Orchestra({
             />
           </div>
         </section>
+
+        */}
 
         {/* Conductor's Transport Bar */}
         <section className="transport" aria-label="Playback controls">
