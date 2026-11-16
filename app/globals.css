@@ -1057,7 +1057,7 @@ kbd {
 
 /* Scene Library */
 .scene-library {
-  margin: 24px 0 20px;
+  margin: 0 0 20px;
 }
 
 .scene-library-heading {
@@ -1194,34 +1194,6 @@ kbd {
   color: var(--tea-green);
 }
 
-.scene-program {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 10px;
-  background: rgba(28, 43, 66, 0.5);
-  padding: 8px 14px;
-  border-radius: 6px;
-  border: 1px solid var(--twilight-indigo);
-}
-
-.scene-program p {
-  margin: 0;
-  font-size: 13px;
-  color: var(--antique-white);
-}
-
-.scene-program strong {
-  font-weight: 700;
-  color: var(--pearl-aqua);
-}
-
-.scene-program > small {
-  font-size: 12px;
-  color: var(--bone);
-}
-
 /* Conductor's Working Studio Workspace */
 .workspace {
   display: grid;
@@ -1311,7 +1283,7 @@ kbd {
 
 .score-ruler {
   display: grid;
-  grid-template-columns: 160px minmax(0, 1fr) 42px;
+  grid-template-columns: 160px minmax(0, 1fr) 72px;
   padding: 8px 14px 6px 20px;
   font-size: 12px;
   font-weight: 700;
@@ -1340,7 +1312,7 @@ kbd {
 
 .track {
   display: grid;
-  grid-template-columns: 160px minmax(0, 1fr) 42px;
+  grid-template-columns: 160px minmax(0, 1fr) 72px;
   min-height: 48px;
   padding: 0 14px 0 20px;
   border-top: 1px solid var(--paper-line);
@@ -1480,6 +1452,20 @@ kbd {
   transition: all 0.15s;
 }
 
+.track-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+.track-reevolve {
+  opacity: 0.65;
+}
+.track-reevolve:hover,
+.track-reevolve:focus-visible {
+  opacity: 1;
+}
+
 .track-mute:hover {
   background: rgba(0, 0, 0, 0.05);
   color: var(--prussian-blue);
@@ -1495,7 +1481,7 @@ kbd {
   top: 20px;
   bottom: 0;
   left: 180px;
-  right: 56px;
+  right: 86px;
   pointer-events: none;
 }
 
@@ -2235,7 +2221,7 @@ kbd {
   }
   .score-ruler,
   .track {
-    grid-template-columns: 130px minmax(0, 1fr) 36px;
+    grid-template-columns: 130px minmax(0, 1fr) 68px;
   }
   .playhead-track {
     left: 150px;

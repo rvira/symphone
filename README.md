@@ -21,7 +21,8 @@ Open [localhost:3000](http://localhost:3000). No account or API key needed.
 4. Choose notes with the pads or **A S D F G H J K**, then **Melodize & queue**. Symphone composes the rhythm and phrasing—not your tap timing or order.
 
 - **Scenes** change the style without stopping playback or clearing your ensemble.
-- **Crescendo** adds a temporary build and release; **Record** saves browser audio.
+- **Re-evolve** beside a score row varies only that instrument, keeping its note palette and mix.
+- **Crescendo** shapes a four-bar orchestral swell and release; **Record** saves browser audio.
 - **Reset all notes** clears the score after confirmation.
 - **Studio** contains Full Orchestra quick start, help and score export.
 

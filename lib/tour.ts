@@ -79,7 +79,7 @@ export const TOUR_STEPS = [
     target: ".score",
     title: "Follow the working score.",
     body: "Each row is an instrument; the small marks show its notes across eight bars. The moving line follows the performance. Select a row to play that section, or use its speaker button to mute it.",
-    tip: "Empty rows are really empty—not hidden arrangements. After building, watch a waiting row gain notes each time Auto-evolve introduces a new section.",
+    tip: "Empty rows are really empty. Auto-evolve introduces waiting sections. The circular arrow beside each active row re-evolves only that instrument, preserving its note palette, layers and mix.",
   },
   {
     id: "instrument",
@@ -114,7 +114,7 @@ export const TOUR_STEPS = [
     target: ".transport",
     title: "Keep the music moving.",
     body: "In Build from Nothing, Auto-evolve adds one new instrument every two bars, following your chosen chords. Once all sections have joined, it varies eligible generated parts while leaving woven phrases alone.",
-    tip: "Click Auto-evolve after building to start playback and grow the orchestra. Turn it off to keep the current ensemble. Crescendo is a separate, temporary tension-and-release effect.",
+    tip: "Auto-evolve grows the orchestra. Crescendo instead queues a four-bar swell on the next downbeat: gather, lift, surge, a brief breath and a chord-aware resolution. It keeps the bass and continues the score without jumping back to bar one.",
   },
   {
     id: "save",

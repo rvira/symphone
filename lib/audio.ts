@@ -1,5 +1,12 @@
 import type { Soundfont } from "smplr";
 import {
+  crescendoFrame,
+  planCrescendo,
+  type CrescendoPlan,
+  type CrescendoPhase,
+} from "./crescendo";
+export { crescendoLength } from "./crescendo";
+import {
   evolveAtBoundary,
   playableScore,
   weave,
@@ -23,14 +30,13 @@ export type PlaybackEvent = {
   step: number;
   score?: Score;
   crescendo: number;
+  crescendoPhase?: CrescendoPhase;
   drop?: boolean;
   cycleBoundary?: boolean;
   layerApplied?: QueuedLayerApplied[];
   instrumentEntered?: InstrumentId;
 };
 export type SampleStatus = "not-loaded" | "loading" | "ready" | "fallback";
-export const crescendoLength = (step: number, barLength = 16) =>
-  barLength - (step % barLength) + barLength;
 
 export class OrchestraEngine {
   private context: AudioContext | null = null;
@@ -45,7 +51,7 @@ export class OrchestraEngine {
   private timer: ReturnType<typeof setInterval> | null = null;
   private nextTime = 0;
   private absoluteStep = 0;
-  private build: { remaining: number; total: number } | null = null;
+  private build: CrescendoPlan | null = null;
   private events: PlaybackEvent[] = [];
   private recorder: MediaRecorder | null = null;
   private index = new Map<
@@ -297,13 +303,24 @@ export class OrchestraEngine {
       let instrumentEntered: InstrumentId | undefined;
       let appliedLayers: QueuedLayerApplied[] | undefined;
 
-      if (this.build && this.build.remaining === 0) {
+      if (this.build && this.absoluteStep >= this.build.end) {
+        const resolution = crescendoFrame(
+          this.score!,
+          this.build,
+          this.absoluteStep,
+          this.solo,
+        );
+        const seconds = secondsPerStep(this.score!);
+        for (const note of resolution.notes)
+          this.voice(
+            note.id,
+            note.midi,
+            this.nextTime,
+            note.duration * seconds,
+            note.velocity,
+          );
         this.build = null;
-        this.absoluteStep = 0;
         drop = true;
-        this.highpass.frequency.cancelScheduledValues(this.nextTime);
-        this.highpass.frequency.setValueAtTime(25, this.nextTime);
-        this.impact(this.nextTime);
       }
 
       const score = this.score!,
@@ -349,52 +366,49 @@ export class OrchestraEngine {
       const activeScore = updated ?? this.score!;
 
       const seconds = secondsPerStep(activeScore);
-      const progress = this.build
-        ? 1 - this.build.remaining / this.build.total
-        : 0;
+      const frame = this.build
+        ? crescendoFrame(activeScore, this.build, this.absoluteStep, this.solo)
+        : null;
+      const progress = frame?.progress ?? 0;
 
       for (const inst of INSTRUMENTS) {
         const part = activeScore.parts[inst.id];
         if (part.muted || (this.solo && this.solo !== inst.id)) continue;
-        if (this.build && ["cello", "percussion", "pulse"].includes(inst.id))
-          continue;
+        if (frame?.gain === 0) continue;
 
         for (const note of this.index.get(inst.id)![step]) {
           this.voice(
             inst.id,
             note.midi,
             this.nextTime,
-            note.duration * seconds * 0.94,
-            note.velocity,
+            Math.min(
+              note.duration,
+              this.build && this.absoluteStep >= this.build.start
+                ? Math.max(0.1, this.build.breath - this.absoluteStep)
+                : note.duration,
+            ) *
+              seconds *
+              0.94,
+            note.velocity * (frame?.gain ?? 1),
           );
         }
       }
 
-      if (this.build) {
-        if (this.build.remaining <= 8 || step % 2 === 0)
-          this.voice(
-            "percussion",
-            43,
-            this.nextTime,
-            seconds * 0.7,
-            0.25 + progress * 0.65,
-          );
-        if (this.build.remaining <= 4)
-          this.voice(
-            "percussion",
-            43,
-            this.nextTime + seconds / 2,
-            seconds * 0.4,
-            0.6,
-          );
-        this.build.remaining--;
-      }
+      for (const note of frame?.notes ?? [])
+        this.voice(
+          note.id,
+          note.midi,
+          this.nextTime + note.offset * seconds,
+          note.duration * seconds,
+          note.velocity,
+        );
 
       this.events.push({
         time: this.nextTime,
         step,
         score: updated,
         crescendo: progress,
+        crescendoPhase: drop ? "Resolve" : frame?.phase,
         drop,
         cycleBoundary: isCycleBoundary,
         instrumentEntered,
@@ -415,17 +429,7 @@ export class OrchestraEngine {
   crescendo() {
     if (!this.playing || this.build || !this.context || !this.score)
       return false;
-    const total = crescendoLength(this.absoluteStep, stepsPerBar(this.score)),
-      duration = total * secondsPerStep(this.score);
-    this.build = { remaining: total, total };
-    const now = this.context.currentTime;
-    this.highpass.frequency.cancelScheduledValues(now);
-    this.highpass.frequency.setValueAtTime(25, now);
-    this.highpass.frequency.exponentialRampToValueAtTime(
-      1100,
-      this.nextTime + duration,
-    );
-    this.riser(now, duration);
+    this.build = planCrescendo(this.score, this.absoluteStep);
     return true;
   }
   setSpace(value: number) {
@@ -560,44 +564,6 @@ export class OrchestraEngine {
       });
     }, duration);
   }
-  private riser(time: number, duration: number) {
-    const ctx = this.context!,
-      source = ctx.createBufferSource();
-    const buffer = ctx.createBuffer(
-      1,
-      Math.ceil(ctx.sampleRate * duration),
-      ctx.sampleRate,
-    );
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-    source.buffer = buffer;
-    const filter = ctx.createBiquadFilter(),
-      gain = ctx.createGain();
-    filter.type = "bandpass";
-    filter.Q.value = 0.8;
-    filter.frequency.setValueAtTime(180, time);
-    filter.frequency.exponentialRampToValueAtTime(7000, time + duration);
-    gain.gain.setValueAtTime(0.001, time);
-    gain.gain.exponentialRampToValueAtTime(0.2, time + duration);
-    source.connect(filter);
-    filter.connect(gain);
-    gain.connect(this.master);
-    source.start(time);
-    source.stop(time + duration);
-    source.onended = () => {
-      filter.disconnect();
-      gain.disconnect();
-    };
-    this.track(() => {
-      gain.gain.cancelScheduledValues(ctx.currentTime);
-      gain.gain.setTargetAtTime(0, ctx.currentTime, 0.03);
-    }, duration);
-  }
-  private impact(time: number) {
-    this.voice("percussion", 38, time, 1.6, 1);
-    this.voice("texture", 38, time, 1.2, 0.8);
-  }
-
   async startRecording() {
     await this.init();
     if (typeof MediaRecorder === "undefined")

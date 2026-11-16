@@ -23,6 +23,7 @@ import {
   MoreHorizontal,
   Play,
   RotateCcw,
+  RefreshCw,
   Sparkles,
   Square,
   Volume2,
@@ -52,6 +53,7 @@ import {
   noteName,
   padNotes,
   reorchestrate,
+  reEvolveInstrument,
   sceneFor,
   undoLayer,
   weave,
@@ -154,6 +156,7 @@ export default function Orchestra({
   const [evolving, setEvolving] = useState(false);
   const [building, setBuilding] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [buildPhase, setBuildPhase] = useState("Preparing");
   const [space, setSpace] = useState(0.4);
   const [energy, setEnergy] = useState(score.energy);
   const [captured, setCaptured] = useState<CapturedNote[]>([]);
@@ -224,6 +227,7 @@ export default function Orchestra({
       for (const event of orchestra.drain()) {
         setStep(event.step);
         setProgress(event.crescendo);
+        if (event.crescendoPhase) setBuildPhase(event.crescendoPhase);
 
         if (event.instrumentEntered) {
           setNotice(
@@ -509,7 +513,10 @@ export default function Orchestra({
       setNotice("Press Play, then shape an orchestral crescendo.");
       return;
     }
-    if (orchestra.crescendo()) setBuilding(true);
+    if (orchestra.crescendo()) {
+      setBuilding(true);
+      setBuildPhase("Preparing");
+    }
   }, []);
 
   useEffect(() => {
@@ -840,6 +847,9 @@ export default function Orchestra({
 
         */}
 
+        {/* Scene Library: 12 Musical Worlds */}
+        <SceneLibrary selected={score.scene} onChoose={chooseScene} />
+
         {/* Conductor's Transport Bar */}
         <section className="transport" aria-label="Playback controls">
           <button
@@ -913,11 +923,11 @@ export default function Orchestra({
           <button
             className={`control-button crescendo ${building ? "enabled" : ""}`}
             onClick={build}
-            disabled={building || !playableScore(score)}
-            title="Trigger an orchestral crescendo build"
+            disabled={building || !playing || !playableScore(score)}
+            title="Queue a four-bar orchestral swell on the next downbeat"
           >
             <Waves size={17} />
-            <span>{building ? "Building…" : "Crescendo"}</span>
+            <span>{building ? buildPhase : "Crescendo"}</span>
             {building ? (
               <span className="crescendo-percent">
                 {Math.round(progress * 100)}%
@@ -937,9 +947,6 @@ export default function Orchestra({
             <span>{recording ? "Save Audio" : "Record"}</span>
           </button>
         </section>
-
-        {/* Scene Library: 12 Musical Worlds */}
-        <SceneLibrary selected={score.scene} onChoose={chooseScene} />
 
         {/* Working Studio Workspace */}
         <div className="workspace">
@@ -997,7 +1004,7 @@ export default function Orchestra({
                     </span>
                   ))}
                 </div>
-                <span>MUTE</span>
+                <span>PART</span>
               </div>
 
               {INSTRUMENTS.map((inst, index) => {
@@ -1084,20 +1091,40 @@ export default function Orchestra({
                       )}
                     </button>
 
-                    <button
-                      className="track-mute"
-                      onClick={() =>
-                        updatePart(inst.id, { muted: !track.muted })
-                      }
-                      aria-label={`${track.muted ? "Unmute" : "Mute"} ${inst.name}`}
-                      aria-pressed={track.muted}
-                    >
-                      {track.muted ? (
-                        <VolumeX size={16} />
-                      ) : (
-                        <Volume2 size={16} />
-                      )}
-                    </button>
+                    <div className="track-actions">
+                      <button
+                        className="track-mute track-reevolve"
+                        disabled={!track.notes.length || building}
+                        aria-label={`Re-evolve ${inst.name}`}
+                        title={`Re-evolve ${inst.name} only; keep your notes, layers and mix`}
+                        onClick={() => {
+                          orchestra.cancelQueuedWeave(inst.id);
+                          setQueuedLayers((prev) =>
+                            prev.filter((q) => q.id !== inst.id),
+                          );
+                          apply(reEvolveInstrument(scoreRef.current, inst.id));
+                          setNotice(
+                            `${inst.name} re-evolved. Other instruments stay unchanged.`,
+                          );
+                        }}
+                      >
+                        <RefreshCw size={15} />
+                      </button>
+                      <button
+                        className="track-mute"
+                        onClick={() =>
+                          updatePart(inst.id, { muted: !track.muted })
+                        }
+                        aria-label={`${track.muted ? "Unmute" : "Mute"} ${inst.name}`}
+                        aria-pressed={track.muted}
+                      >
+                        {track.muted ? (
+                          <VolumeX size={16} />
+                        ) : (
+                          <Volume2 size={16} />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 );
               })}
@@ -1285,11 +1312,6 @@ export default function Orchestra({
                   </p>
                 )}
               </div>
-
-              <p className="no-notes-hint">
-                Timing doesn’t matter. Symphone turns your notes into a melody
-                that fits the scene and chords.
-              </p>
 
               {/* Status if layer is currently queued for eventual cycle downbeat */}
               {selectedIsQueued && (
@@ -1502,9 +1524,11 @@ export default function Orchestra({
                 cycle downbeat.
               </li>
               <li>
-                <strong>Build an orchestral crescendo.</strong> Hit Crescendo to
-                strip low end, accelerate percussion, and trigger an ensemble
-                impact.
+                <strong>Shape an orchestral crescendo.</strong> Crescendo queues
+                a four-bar swell: gathering, lifting, surging, a brief breath,
+                then a chord-aware resolution. Bass stays grounded and playback
+                continues without restarting. Re-evolve beside a score row
+                varies only that instrument, keeping its note palette and mix.
               </li>
               <li>
                 <strong>Capture the moment.</strong> Record downloads your full

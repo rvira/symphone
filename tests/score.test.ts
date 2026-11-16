@@ -195,13 +195,13 @@ test("every section can vary across seeds", () => {
   }
 });
 
-test("crescendo always spans to the next bar plus a complete bar", () => {
+test("crescendo always queues to the next bar plus a four-bar swell", () => {
   for (const scene of SCENES) {
     const score = compose(scene.id, 1),
       bar = stepsPerBar(score);
     for (let step = 0; step < totalSteps(score); step++) {
       const duration = crescendoLength(step, bar);
-      assert.ok(duration >= bar + 1 && duration <= bar * 2);
+      assert.ok(duration >= bar * 4 + 1 && duration <= bar * 5);
       assert.equal((step + duration) % bar, 0);
     }
   }

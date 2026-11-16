@@ -1118,12 +1118,26 @@ export function melodize(
   );
   const r = random(seed);
   const barLength = stepsPerBar(score);
-  const motif = [
-    0,
-    Math.floor(palette.length / 2),
-    palette.length - 1,
-    Math.floor(palette.length / 2),
-  ];
+  const motif = choose(r, [
+    [
+      0,
+      Math.floor(palette.length / 2),
+      palette.length - 1,
+      Math.floor(palette.length / 2),
+    ],
+    [
+      Math.floor(palette.length / 2),
+      palette.length - 1,
+      Math.floor(palette.length / 2),
+      0,
+    ],
+    [
+      palette.length - 1,
+      Math.floor(palette.length / 2),
+      0,
+      Math.floor(palette.length / 2),
+    ],
+  ]);
   const template = generatePart(id, scene, seed, score.energy)
     .sort((a, b) => a.step - b.step)
     .filter(
@@ -1179,14 +1193,19 @@ export function melodize(
       ) - note.step;
     const sustained = id === "texture" || id === "brass" || id === "cello";
     const duration =
-      phraseEnd || sustained ? gap * 0.9 : Math.min(note.duration, gap * 0.8);
+      phraseEnd || sustained
+        ? gap * (0.82 + r() * 0.12)
+        : Math.min(note.duration, gap * (0.7 + r() * 0.15));
     return {
       step: note.step,
       midi: previous,
       duration: Math.max(0.5, duration),
       velocity: Math.min(
         1,
-        note.velocity * (strong ? 1 : 0.8) * (layer > 1 ? 0.82 : 1),
+        note.velocity *
+          (strong ? 1 : 0.8) *
+          (layer > 1 ? 0.82 : 1) *
+          (0.94 + r() * 0.06),
       ),
       layer,
     };
@@ -1213,6 +1232,36 @@ export function weave(
       ...score.parts,
       [id]: { ...part, notes, layers: layer, muted: false },
     },
+  };
+}
+
+export function reEvolveInstrument(score: Score, id: InstrumentId): Score {
+  if (!playableScore(score) || !score.parts[id].notes.length) return score;
+  const part = score.parts[id];
+  const generation = score.generation + 1;
+  const seed = score.seed + generation * 8191;
+  const notes = part.layers
+    ? Array.from({ length: part.layers }, (_, i) => {
+        const layer = i + 1;
+        const palette = [
+          ...new Set(
+            part.notes.filter((n) => n.layer === layer).map((n) => n.midi),
+          ),
+        ];
+        return melodize(
+          { ...score, seed },
+          id,
+          palette.map((midi) => ({ midi, time: 0 })),
+          layer,
+        );
+      })
+        .flat()
+        .sort((a, b) => a.step - b.step)
+    : generatePart(id, sceneForScore(score), seed, score.energy);
+  return {
+    ...score,
+    generation,
+    parts: { ...score.parts, [id]: { ...part, notes } },
   };
 }
 

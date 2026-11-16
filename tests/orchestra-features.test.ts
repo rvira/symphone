@@ -216,7 +216,7 @@ test("crescendo timing is bounded and synchronizes with bar cycles", () => {
   for (let bar = 0; bar < 8; bar++) {
     const step = bar * 16;
     const len = crescendoLength(step, 16);
-    // When called on downbeat, spans to next bar + full bar = 32 steps (2 bars)
-    assert.equal(len, 32);
+    // Queue to the next downbeat, then a full four-bar swell.
+    assert.equal(len, 80);
   }
 });
