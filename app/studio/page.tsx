@@ -2,7 +2,31 @@
 
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import Orchestra from "../../components/Orchestra";
+import dynamic from "next/dynamic";
+
+// Scores are randomly generated or restored from browser storage. Prerendering
+// them on the server produces different notes during hydration.
+const Orchestra = dynamic(() => import("../../components/Orchestra"), {
+  ssr: false,
+  loading: StudioLoading,
+});
+
+function StudioLoading() {
+  return (
+    <div className="studio-loading-screen" role="status">
+      <div className="wordmark">
+        <span className="brand-icon">
+          <i />
+          <i />
+          <i />
+          <i />
+        </span>
+        <span className="brand-text">SYMPHONE</span>
+      </div>
+      <p>Preparing the Concert Hall…</p>
+    </div>
+  );
+}
 
 function StudioContent() {
   const searchParams = useSearchParams();
@@ -13,22 +37,7 @@ function StudioContent() {
 
 export default function StudioPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="studio-loading-screen">
-          <div className="wordmark">
-            <span className="brand-icon">
-              <i />
-              <i />
-              <i />
-              <i />
-            </span>
-            <span className="brand-text">SYMPHONE</span>
-          </div>
-          <p>Preparing the Concert Hall…</p>
-        </div>
-      }
-    >
+    <Suspense fallback={<StudioLoading />}>
       <StudioContent />
     </Suspense>
   );
