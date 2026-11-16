@@ -11,8 +11,8 @@ export default function StagePlan({ selected }: { selected: InstrumentId }) {
     >
       <defs>
         <radialGradient id="floor-light">
-          <stop stopColor="#e3c698" />
-          <stop offset="1" stopColor="#b5966b" />
+          <stop stopColor="#f9ecd9" />
+          <stop offset="1" stopColor="#e8ddc9" />
         </radialGradient>
         <pattern
           id="wood-boards"
@@ -22,10 +22,10 @@ export default function StagePlan({ selected }: { selected: InstrumentId }) {
         >
           <path
             d="M0 14h38M0 0v14m38-14v14"
-            stroke="#765a37"
-            strokeOpacity=".12"
+            stroke="#444969"
+            strokeOpacity=".1"
           />
-          <path d="M2 5h30M7 9h22" stroke="#fff3d3" strokeOpacity=".14" />
+          <path d="M2 5h30M7 9h22" stroke="#f9ecd9" strokeOpacity=".15" />
         </pattern>
       </defs>
       <ellipse
@@ -33,15 +33,15 @@ export default function StagePlan({ selected }: { selected: InstrumentId }) {
         cy="168"
         rx="242"
         ry="112"
-        fill="#4c3d2a"
-        opacity=".09"
+        fill="#1c2b42"
+        opacity=".35"
       />
       <ellipse cx="280" cy="157" rx="242" ry="112" fill="url(#floor-light)" />
       <ellipse cx="280" cy="157" rx="242" ry="112" fill="url(#wood-boards)" />
       <path
         d="M71 112c82-69 336-69 418 0M85 99c85-64 305-64 390 0"
-        stroke="#886c47"
-        strokeOpacity=".25"
+        stroke="#444969"
+        strokeOpacity=".3"
       />
       {STAGE_SECTIONS.map((section) => (
         <g key={section.id} opacity={selected === section.id ? 1 : 0.65}>

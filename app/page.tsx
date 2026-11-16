@@ -41,9 +41,9 @@ export default function LandingPage() {
           >
             <defs>
               <linearGradient id="hallGlow" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#c9a54d" stopOpacity="0.22" />
-                <stop offset="65%" stopColor="#c9a54d" stopOpacity="0.04" />
-                <stop offset="100%" stopColor="#c9a54d" stopOpacity="0" />
+                <stop offset="0%" stopColor="#7dbfbd" stopOpacity="0.22" />
+                <stop offset="65%" stopColor="#444969" stopOpacity="0.08" />
+                <stop offset="100%" stopColor="#1c2b42" stopOpacity="0" />
               </linearGradient>
             </defs>
 
@@ -56,27 +56,27 @@ export default function LandingPage() {
             {/* Concentric Orchestral Seating Tiers */}
             <path
               d="M 150 400 A 390 270 0 0 1 850 400"
-              stroke="#c9a54d"
-              strokeOpacity="0.14"
+              stroke="#7dbfbd"
+              strokeOpacity="0.18"
               strokeWidth="1"
               strokeDasharray="4 4"
             />
             <path
               d="M 230 400 A 300 200 0 0 1 770 400"
-              stroke="#c9a54d"
-              strokeOpacity="0.22"
+              stroke="#c0d2ad"
+              strokeOpacity="0.25"
               strokeWidth="1"
             />
             <path
               d="M 320 400 A 200 130 0 0 1 680 400"
-              stroke="#c9a54d"
-              strokeOpacity="0.25"
+              stroke="#7dbfbd"
+              strokeOpacity="0.28"
               strokeWidth="1"
               strokeDasharray="3 3"
             />
             <path
               d="M 400 400 A 110 70 0 0 1 600 400"
-              stroke="#c9a54d"
+              stroke="#c0d2ad"
               strokeOpacity="0.35"
               strokeWidth="1.2"
             />
@@ -87,8 +87,8 @@ export default function LandingPage() {
               y1="400"
               x2="170"
               y2="210"
-              stroke="#c9a54d"
-              strokeOpacity="0.09"
+              stroke="#7dbfbd"
+              strokeOpacity="0.12"
               strokeWidth="1"
             />
             <line
@@ -96,8 +96,8 @@ export default function LandingPage() {
               y1="400"
               x2="280"
               y2="140"
-              stroke="#c9a54d"
-              strokeOpacity="0.09"
+              stroke="#c0d2ad"
+              strokeOpacity="0.12"
               strokeWidth="1"
             />
             <line
@@ -105,8 +105,8 @@ export default function LandingPage() {
               y1="400"
               x2="410"
               y2="105"
-              stroke="#c9a54d"
-              strokeOpacity="0.09"
+              stroke="#7dbfbd"
+              strokeOpacity="0.12"
               strokeWidth="1"
             />
             <line
@@ -114,8 +114,8 @@ export default function LandingPage() {
               y1="400"
               x2="500"
               y2="90"
-              stroke="#c9a54d"
-              strokeOpacity="0.14"
+              stroke="#f9ecd9"
+              strokeOpacity="0.18"
               strokeWidth="1"
               strokeDasharray="3 3"
             />
@@ -124,8 +124,8 @@ export default function LandingPage() {
               y1="400"
               x2="590"
               y2="105"
-              stroke="#c9a54d"
-              strokeOpacity="0.09"
+              stroke="#7dbfbd"
+              strokeOpacity="0.12"
               strokeWidth="1"
             />
             <line
@@ -133,8 +133,8 @@ export default function LandingPage() {
               y1="400"
               x2="720"
               y2="140"
-              stroke="#c9a54d"
-              strokeOpacity="0.09"
+              stroke="#c0d2ad"
+              strokeOpacity="0.12"
               strokeWidth="1"
             />
             <line
@@ -142,77 +142,80 @@ export default function LandingPage() {
               y1="400"
               x2="830"
               y2="210"
-              stroke="#c9a54d"
-              strokeOpacity="0.09"
+              stroke="#7dbfbd"
+              strokeOpacity="0.12"
               strokeWidth="1"
             />
 
-            {/* Instrument Section Nodes */}
+            {/* Instrument Section Nodes - Palette Applied */}
+            {/* Front Tier: Violins & Cellos (Pearl Aqua & Tea Green) */}
             <circle
               cx="430"
               cy="340"
               r="3.5"
-              fill="#f59e0b"
-              fillOpacity="0.75"
+              fill="#7dbfbd"
+              fillOpacity="0.85"
             />
-            <circle cx="465" cy="332" r="3" fill="#f59e0b" fillOpacity="0.75" />
-            <circle cx="500" cy="330" r="3" fill="#f59e0b" fillOpacity="0.75" />
-            <circle cx="535" cy="332" r="3" fill="#06b6d4" fillOpacity="0.75" />
+            <circle cx="465" cy="332" r="3" fill="#7dbfbd" fillOpacity="0.85" />
+            <circle cx="500" cy="330" r="3" fill="#7dbfbd" fillOpacity="0.85" />
+            <circle cx="535" cy="332" r="3" fill="#c0d2ad" fillOpacity="0.85" />
             <circle
               cx="570"
               cy="340"
               r="3.5"
-              fill="#06b6d4"
-              fillOpacity="0.75"
+              fill="#c0d2ad"
+              fillOpacity="0.85"
             />
 
+            {/* Middle Tier: Woodwinds & Harp (Tea Green & Rosewood) */}
             <circle
               cx="360"
               cy="275"
               r="3.5"
-              fill="#10b981"
-              fillOpacity="0.7"
+              fill="#c0d2ad"
+              fillOpacity="0.8"
             />
             <circle
               cx="425"
               cy="250"
               r="3.5"
-              fill="#10b981"
-              fillOpacity="0.7"
+              fill="#c0d2ad"
+              fillOpacity="0.8"
             />
             <circle
               cx="500"
               cy="240"
               r="3.5"
-              fill="#10b981"
-              fillOpacity="0.7"
+              fill="#7dbfbd"
+              fillOpacity="0.8"
             />
             <circle
               cx="575"
               cy="250"
               r="3.5"
-              fill="#ec4899"
-              fillOpacity="0.7"
+              fill="#905269"
+              fillOpacity="0.85"
             />
             <circle
               cx="640"
               cy="275"
               r="3.5"
-              fill="#ec4899"
-              fillOpacity="0.7"
+              fill="#905269"
+              fillOpacity="0.85"
             />
 
-            <circle cx="270" cy="210" r="4" fill="#eab308" fillOpacity="0.7" />
-            <circle cx="370" cy="175" r="4" fill="#eab308" fillOpacity="0.7" />
+            {/* Back Tier: Brass & Timpani (Bone & Burnt Rose) */}
+            <circle cx="270" cy="210" r="4" fill="#e8ddc9" fillOpacity="0.8" />
+            <circle cx="370" cy="175" r="4" fill="#e8ddc9" fillOpacity="0.8" />
             <circle
               cx="500"
               cy="160"
               r="4.5"
-              fill="#ef4444"
-              fillOpacity="0.8"
+              fill="#814a4c"
+              fillOpacity="0.9"
             />
-            <circle cx="630" cy="175" r="4" fill="#eab308" fillOpacity="0.7" />
-            <circle cx="730" cy="210" r="4" fill="#8b5cf6" fillOpacity="0.7" />
+            <circle cx="630" cy="175" r="4" fill="#e8ddc9" fillOpacity="0.8" />
+            <circle cx="730" cy="210" r="4" fill="#444969" fillOpacity="0.85" />
 
             {/* Maestro Podium */}
             <rect
@@ -221,10 +224,10 @@ export default function LandingPage() {
               width="28"
               height="16"
               rx="3"
-              fill="#c9a54d"
-              fillOpacity="0.8"
+              fill="#f9ecd9"
+              fillOpacity="0.9"
             />
-            <circle cx="500" cy="398" r="3" fill="#ffffff" />
+            <circle cx="500" cy="398" r="3" fill="#7dbfbd" />
           </svg>
         </div>
 
@@ -237,9 +240,9 @@ export default function LandingPage() {
           >
             <defs>
               <linearGradient id="hallGlow" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#c9a54d" stopOpacity="0.22" />
-                <stop offset="65%" stopColor="#c9a54d" stopOpacity="0.04" />
-                <stop offset="100%" stopColor="#c9a54d" stopOpacity="0" />
+                <stop offset="0%" stopColor="#7dbfbd" stopOpacity="0.22" />
+                <stop offset="65%" stopColor="#444969" stopOpacity="0.08" />
+                <stop offset="100%" stopColor="#1c2b42" stopOpacity="0" />
               </linearGradient>
             </defs>
 
@@ -252,27 +255,27 @@ export default function LandingPage() {
             {/* Concentric Orchestral Seating Tiers */}
             <path
               d="M 150 400 A 390 270 0 0 1 850 400"
-              stroke="#c9a54d"
-              strokeOpacity="0.14"
+              stroke="#7dbfbd"
+              strokeOpacity="0.18"
               strokeWidth="1"
               strokeDasharray="4 4"
             />
             <path
               d="M 230 400 A 300 200 0 0 1 770 400"
-              stroke="#c9a54d"
-              strokeOpacity="0.22"
+              stroke="#c0d2ad"
+              strokeOpacity="0.25"
               strokeWidth="1"
             />
             <path
               d="M 320 400 A 200 130 0 0 1 680 400"
-              stroke="#c9a54d"
-              strokeOpacity="0.25"
+              stroke="#7dbfbd"
+              strokeOpacity="0.28"
               strokeWidth="1"
               strokeDasharray="3 3"
             />
             <path
               d="M 400 400 A 110 70 0 0 1 600 400"
-              stroke="#c9a54d"
+              stroke="#c0d2ad"
               strokeOpacity="0.35"
               strokeWidth="1.2"
             />
@@ -283,8 +286,8 @@ export default function LandingPage() {
               y1="400"
               x2="170"
               y2="210"
-              stroke="#c9a54d"
-              strokeOpacity="0.09"
+              stroke="#7dbfbd"
+              strokeOpacity="0.12"
               strokeWidth="1"
             />
             <line
@@ -292,8 +295,8 @@ export default function LandingPage() {
               y1="400"
               x2="280"
               y2="140"
-              stroke="#c9a54d"
-              strokeOpacity="0.09"
+              stroke="#c0d2ad"
+              strokeOpacity="0.12"
               strokeWidth="1"
             />
             <line
@@ -301,8 +304,8 @@ export default function LandingPage() {
               y1="400"
               x2="410"
               y2="105"
-              stroke="#c9a54d"
-              strokeOpacity="0.09"
+              stroke="#7dbfbd"
+              strokeOpacity="0.12"
               strokeWidth="1"
             />
             <line
@@ -310,8 +313,8 @@ export default function LandingPage() {
               y1="400"
               x2="500"
               y2="90"
-              stroke="#c9a54d"
-              strokeOpacity="0.14"
+              stroke="#f9ecd9"
+              strokeOpacity="0.18"
               strokeWidth="1"
               strokeDasharray="3 3"
             />
@@ -320,8 +323,8 @@ export default function LandingPage() {
               y1="400"
               x2="590"
               y2="105"
-              stroke="#c9a54d"
-              strokeOpacity="0.09"
+              stroke="#7dbfbd"
+              strokeOpacity="0.12"
               strokeWidth="1"
             />
             <line
@@ -329,8 +332,8 @@ export default function LandingPage() {
               y1="400"
               x2="720"
               y2="140"
-              stroke="#c9a54d"
-              strokeOpacity="0.09"
+              stroke="#c0d2ad"
+              strokeOpacity="0.12"
               strokeWidth="1"
             />
             <line
@@ -338,77 +341,80 @@ export default function LandingPage() {
               y1="400"
               x2="830"
               y2="210"
-              stroke="#c9a54d"
-              strokeOpacity="0.09"
+              stroke="#7dbfbd"
+              strokeOpacity="0.12"
               strokeWidth="1"
             />
 
-            {/* Instrument Section Nodes */}
+            {/* Instrument Section Nodes - Palette Applied */}
+            {/* Front Tier: Violins & Cellos (Pearl Aqua & Tea Green) */}
             <circle
               cx="430"
               cy="340"
               r="3.5"
-              fill="#f59e0b"
-              fillOpacity="0.75"
+              fill="#7dbfbd"
+              fillOpacity="0.85"
             />
-            <circle cx="465" cy="332" r="3" fill="#f59e0b" fillOpacity="0.75" />
-            <circle cx="500" cy="330" r="3" fill="#f59e0b" fillOpacity="0.75" />
-            <circle cx="535" cy="332" r="3" fill="#06b6d4" fillOpacity="0.75" />
+            <circle cx="465" cy="332" r="3" fill="#7dbfbd" fillOpacity="0.85" />
+            <circle cx="500" cy="330" r="3" fill="#7dbfbd" fillOpacity="0.85" />
+            <circle cx="535" cy="332" r="3" fill="#c0d2ad" fillOpacity="0.85" />
             <circle
               cx="570"
               cy="340"
               r="3.5"
-              fill="#06b6d4"
-              fillOpacity="0.75"
+              fill="#c0d2ad"
+              fillOpacity="0.85"
             />
 
+            {/* Middle Tier: Woodwinds & Harp (Tea Green & Rosewood) */}
             <circle
               cx="360"
               cy="275"
               r="3.5"
-              fill="#10b981"
-              fillOpacity="0.7"
+              fill="#c0d2ad"
+              fillOpacity="0.8"
             />
             <circle
               cx="425"
               cy="250"
               r="3.5"
-              fill="#10b981"
-              fillOpacity="0.7"
+              fill="#c0d2ad"
+              fillOpacity="0.8"
             />
             <circle
               cx="500"
               cy="240"
               r="3.5"
-              fill="#10b981"
-              fillOpacity="0.7"
+              fill="#7dbfbd"
+              fillOpacity="0.8"
             />
             <circle
               cx="575"
               cy="250"
               r="3.5"
-              fill="#ec4899"
-              fillOpacity="0.7"
+              fill="#905269"
+              fillOpacity="0.85"
             />
             <circle
               cx="640"
               cy="275"
               r="3.5"
-              fill="#ec4899"
-              fillOpacity="0.7"
+              fill="#905269"
+              fillOpacity="0.85"
             />
 
-            <circle cx="270" cy="210" r="4" fill="#eab308" fillOpacity="0.7" />
-            <circle cx="370" cy="175" r="4" fill="#eab308" fillOpacity="0.7" />
+            {/* Back Tier: Brass & Timpani (Bone & Burnt Rose) */}
+            <circle cx="270" cy="210" r="4" fill="#e8ddc9" fillOpacity="0.8" />
+            <circle cx="370" cy="175" r="4" fill="#e8ddc9" fillOpacity="0.8" />
             <circle
               cx="500"
               cy="160"
               r="4.5"
-              fill="#ef4444"
-              fillOpacity="0.8"
+              fill="#814a4c"
+              fillOpacity="0.9"
             />
-            <circle cx="630" cy="175" r="4" fill="#eab308" fillOpacity="0.7" />
-            <circle cx="730" cy="210" r="4" fill="#8b5cf6" fillOpacity="0.7" />
+            <circle cx="630" cy="175" r="4" fill="#e8ddc9" fillOpacity="0.8" />
+            <circle cx="730" cy="210" r="4" fill="#444969" fillOpacity="0.85" />
 
             {/* Maestro Podium */}
             <rect
@@ -417,10 +423,10 @@ export default function LandingPage() {
               width="28"
               height="16"
               rx="3"
-              fill="#c9a54d"
-              fillOpacity="0.8"
+              fill="#f9ecd9"
+              fillOpacity="0.9"
             />
-            <circle cx="500" cy="398" r="3" fill="#ffffff" />
+            <circle cx="500" cy="398" r="3" fill="#7dbfbd" />
           </svg>
         </div>
 

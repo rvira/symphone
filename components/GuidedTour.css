@@ -5,9 +5,9 @@
 .tour-spotlight {
   position: fixed;
   pointer-events: none;
-  border: 2px solid #c1a777;
+  border: 2px solid #7dbfbd;
   border-radius: 9px;
-  box-shadow: 0 0 0 9999px #1016119c;
+  box-shadow: 0 0 0 9999px rgba(28, 43, 66, 0.75);
   transition:
     left 180ms ease,
     top 180ms ease,
@@ -16,7 +16,7 @@
 }
 .tour-spotlight.tour-no-target {
   inset: 0;
-  background: #1016118c;
+  background: rgba(28, 43, 66, 0.75);
   border: 0;
   border-radius: 0;
   box-shadow: none;
@@ -28,18 +28,18 @@
   overscroll-behavior: contain;
   padding: 23px;
   border-radius: 9px;
-  border: 1px solid #cfc4ac;
-  background: #f7f4eb;
-  color: #303b31;
-  box-shadow: 0 16px 60px #0d180e38;
-  font-family: "DM Sans", sans-serif;
+  border: 1px solid #444969;
+  background: #f9ecd9;
+  color: #1c2b42;
+  box-shadow: 0 16px 60px rgba(28, 43, 66, 0.5);
+  font-family: "Plus Jakarta Sans", sans-serif;
   pointer-events: auto;
 }
 .tour-topline {
   position: sticky;
   top: 0;
   z-index: 1;
-  background: #f7f4eb;
+  background: #f9ecd9;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -49,9 +49,9 @@
   display: flex;
   gap: 7px;
   align-items: center;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 1px;
-  color: #746444;
+  color: #444969;
 }
 .tour-card button {
   min-height: 36px;
@@ -60,8 +60,8 @@
   text-decoration: underline;
   text-underline-offset: 3px;
   padding: 0 2px;
-  color: #606858;
-  font-size: 11px;
+  color: #444969;
+  font-size: 12px;
   white-space: nowrap;
 }
 .tour-progress {
@@ -72,64 +72,64 @@
 .tour-progress i {
   height: 3px;
   flex: 1;
-  background: #dedfd3;
+  background: #e8ddc9;
   border-radius: 2px;
 }
 .tour-progress i.visited {
-  background: #809073;
+  background: #7dbfbd;
 }
 .tour-step-number {
-  font-size: 9px;
-  color: #737d6a;
+  font-size: 11px;
+  color: #444969;
   letter-spacing: 1px;
   margin: 0 0 7px;
 }
 .tour-card h2 {
   font:
-    30px/1.1 "Libre Caslon Display",
+    30px/1.1 "Cinzel",
     Georgia,
     serif;
   letter-spacing: -0.4px;
   margin: 0 0 15px;
-  color: #303b31;
+  color: #1c2b42;
 }
 .tour-card h2:focus {
   outline: none;
 }
 .tour-body {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.75;
-  color: #586352;
+  color: #1c3149;
   margin: 0 0 14px;
 }
 .tour-tip {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.7;
   padding: 12px 13px;
   margin: 0 0 10px;
-  border-left: 2px solid #b29b6c;
-  background: #edece1;
-  color: #535e4e;
+  border-left: 3px solid #7dbfbd;
+  background: #e8ddc9;
+  color: #1c2b42;
 }
 .tour-try {
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 0;
-  font-size: 11px;
-  color: #4b644f;
+  font-size: 12px;
+  color: #444969;
 }
 .tour-try span {
-  font-size: 9px;
+  font-size: 11px;
   margin-left: auto;
-  color: #6b7364;
+  color: #444969;
 }
 .tour-actions {
   display: flex;
   gap: 12px;
   justify-content: space-between;
   margin-top: 17px;
-  border-top: 1px solid #dedccf;
+  border-top: 1px solid #e8ddc9;
   padding-top: 17px;
 }
 .tour-back,
@@ -139,19 +139,20 @@
   justify-content: center;
   gap: 8px;
   font-size: 12px;
-  padding: 9px 12px;
+  padding: 9px 14px;
   border-radius: 4px;
+  font-weight: 600;
 }
 .tour-back {
-  color: #5c6855;
+  color: #444969;
 }
 .tour-next {
-  background: #435d49;
-  color: #fffdf4;
+  background: #7dbfbd;
+  color: #1c2b42;
   margin-left: auto;
 }
 .tour-next:hover {
-  background: #334b39;
+  background: #c0d2ad;
 }
 .tour-restart {
   display: flex;
@@ -161,9 +162,10 @@
   width: 100%;
   padding: 13px;
   margin: 0 0 12px;
-  border: 1px solid #a99a77;
+  border: 1px solid #7dbfbd;
   border-radius: 4px;
-  color: #53664d;
+  color: #1c2b42;
+  font-weight: 600;
 }
 @media (max-width: 600px) {
   .tour-card {
