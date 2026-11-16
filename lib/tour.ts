@@ -48,17 +48,17 @@ export const TOUR_STEPS = [
   },
   {
     id: "entrance",
-    target: ".orchestra-start-cards, .sound-mode-switcher",
+    target: ".orchestra-start-cards, .studio-menu > summary",
     title: "Choose your entrance.",
     body: "Build from Nothing is the default: your score begins empty until you choose instruments and chords and build a foundation. Full Orchestra is a quick-start alternative with all eight parts ready.",
-    tip: "Start with Build from Nothing to compose your own foundation. The two modes save their scores separately, so switching modes preserves your saved work.",
+    tip: "Open Studio in the header to switch modes. The two modes save their scores separately, so switching modes preserves your saved work.",
   },
   {
     id: "scenes",
     target: ".scene-library",
     title: "Set the musical scene.",
-    body: "Scenes set the scale, tempo, rhythm and instrument balance. In Build from Nothing, choosing a scene leaves the score empty; you choose its chord progression in the foundation panel.",
-    tip: "Try Ballet & classical → British ballet for a light 3/4 sway. Changing scenes or choosing New movement clears your phrases and starts a fresh score.",
+    body: "Scenes set the scale, tempo and rhythm. Changing scenes reinterprets your existing instruments and chords without stopping playback or requiring another Build. Empty scores stay empty until you build.",
+    tip: "Try Ballet & classical → British ballet for a light 3/4 sway. Woven phrases keep their pitches and adapt to the new meter. Reset all notes beside the score lets you start empty again.",
   },
   {
     id: "foundation",
@@ -120,7 +120,7 @@ export const TOUR_STEPS = [
     id: "save",
     target: ".record-button",
     title: "Keep your performance.",
-    body: "Record captures the browser mix, including your live playing—not your microphone. Save Audio downloads it. Export Score in the header saves the arrangement as JSON; the score also autosaves on this device.",
+    body: "Record captures the browser mix, including your live playing—not your microphone. Save Audio downloads it. Studio → Export Score saves the arrangement as JSON; the score also autosaves on this device.",
     tip: "You’re ready to conduct. Reopen this walkthrough anytime from How to play → Take the guided tour. Skipping or finishing keeps it from appearing automatically again.",
   },
 ] as const;

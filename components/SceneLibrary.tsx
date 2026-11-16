@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { Check, Shuffle } from "lucide-react";
+import { Check } from "lucide-react";
 import {
   SCENES,
   SCENE_FAMILIES,
@@ -11,11 +11,9 @@ import {
 export default function SceneLibrary({
   selected,
   onChoose,
-  onNew,
 }: {
   selected: SceneId;
   onChoose: (scene: SceneId) => void;
-  onNew: () => void;
 }) {
   const [family, setFamily] = useState<SceneFamily>("All scenes");
   const scene = sceneFor(selected);
@@ -28,9 +26,6 @@ export default function SceneLibrary({
         <h2 id="scene-heading">
           Set the scene <span>{SCENES.length} musical worlds</span>
         </h2>
-        <button className="new-movement" onClick={onNew}>
-          <Shuffle size={14} /> New movement
-        </button>
       </div>
       <div className="scene-filters" role="group" aria-label="Scene families">
         {SCENE_FAMILIES.map((f) => (
@@ -71,7 +66,10 @@ export default function SceneLibrary({
         <p>
           <strong>{scene.name}.</strong> {scene.description}
         </p>
-        <small>Changing scenes starts a fresh score.</small>
+        <small>
+          Change the style, keep your ensemble and chords. Woven phrases keep
+          their pitches.
+        </small>
       </div>
     </section>
   );

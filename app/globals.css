@@ -1,7 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
 
 :root {
-  font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  font-family:
+    "Plus Jakarta Sans",
+    system-ui,
+    -apple-system,
+    sans-serif;
   color: #f4f2eb;
   background: #0f1013;
   font-synthesis: none;
@@ -300,7 +304,9 @@ kbd {
 .subtle-card:hover {
   background: rgba(34, 38, 48, 0.95);
   border-color: rgba(201, 165, 77, 0.55);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(201, 165, 77, 0.2);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(201, 165, 77, 0.2);
   transform: translateY(-2px);
 }
 
@@ -333,7 +339,9 @@ kbd {
 
 .card-arrow {
   color: var(--hall-muted);
-  transition: transform 0.15s ease, color 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    color 0.15s ease;
 }
 
 .subtle-card:hover .card-arrow {
@@ -444,6 +452,64 @@ kbd {
   align-items: center;
   gap: 14px;
   margin-left: auto;
+}
+
+.studio-menu {
+  position: relative;
+  z-index: 30;
+}
+.studio-menu > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+  padding: 9px 12px;
+  border: 1px solid var(--hall-border);
+  border-radius: 6px;
+  font-size: 13px;
+}
+.studio-menu > summary::-webkit-details-marker {
+  display: none;
+}
+.studio-menu > summary:focus-visible {
+  outline: 2px solid var(--hall-gold-light);
+  outline-offset: 3px;
+}
+.studio-menu-content {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  width: min(280px, calc(100vw - 32px));
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+  background: #111214;
+  border: 1px solid var(--hall-border);
+  border-radius: 8px;
+  box-shadow: 0 16px 40px #0008;
+}
+.studio-menu-content .sound-mode-switcher {
+  display: grid;
+}
+.studio-menu-content button {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 10px;
+}
+.score-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.reset-notes {
+  font-size: 12px;
+  color: var(--hall-muted);
+}
+.reset-notes:hover {
+  color: #fff;
 }
 
 .back-home-btn {
@@ -1660,7 +1726,10 @@ kbd {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
   touch-action: none;
   user-select: none;
-  transition: transform 0.1s, background 0.15s, border-bottom 0.1s;
+  transition:
+    transform 0.1s,
+    background 0.15s,
+    border-bottom 0.1s;
 }
 
 .note-pad.root-note {

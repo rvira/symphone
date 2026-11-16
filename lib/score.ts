@@ -952,6 +952,60 @@ export const emptyScore = (
   energy = 0.58,
 ) => compose(sceneId, seed, energy, { startingInstruments: [], empty: true });
 
+// Reinterpret the existing ensemble, not a new composition. User phrases keep
+// their pitches and relative bar positions when the new scene changes meter.
+export function changeScene(score: Score, scene: SceneId): Score {
+  if (scene === score.scene) return score;
+  const next = compose(scene, score.seed, score.energy, {
+    startingInstruments: activeInstruments(score),
+    progression: sceneForScore(score).progression,
+    empty: !!score.construction && !score.construction.built,
+  });
+  const ratio = stepsPerBar(next) / stepsPerBar(score);
+  return {
+    ...score,
+    scene,
+    bpm: next.bpm,
+    progression: next.progression,
+    parts: Object.fromEntries(
+      INSTRUMENTS.map(({ id }) => {
+        const part = score.parts[id];
+        return [
+          id,
+          {
+            ...part,
+            notes: part.layers
+              ? part.notes.map((note) => {
+                  const step = Math.min(
+                    totalSteps(next) - 1,
+                    Math.round(note.step * ratio),
+                  );
+                  return {
+                    ...note,
+                    step,
+                    duration: Math.min(
+                      totalSteps(next) - step,
+                      Math.max(1, Math.round(note.duration * ratio)),
+                    ),
+                  };
+                })
+              : next.parts[id].notes,
+          },
+        ];
+      }),
+    ) as Score["parts"],
+  };
+}
+
+export function resetNotes(score: Score): Score {
+  const empty = emptyScore(score.scene, randomSeed(), score.energy);
+  return {
+    ...empty,
+    bpm: score.bpm,
+    progression: [...sceneForScore(score).progression],
+  };
+}
+
 export function buildFoundation(
   score: Score,
   instruments: readonly InstrumentId[],

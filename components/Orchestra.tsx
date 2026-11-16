@@ -20,6 +20,7 @@ import {
   HelpCircle,
   Layers,
   Music2,
+  MoreHorizontal,
   Play,
   RotateCcw,
   Sparkles,
@@ -39,6 +40,8 @@ import {
   totalSteps,
   compose,
   emptyScore,
+  changeScene,
+  resetNotes,
   buildFoundation,
   activeInstruments,
   playableScore,
@@ -429,6 +432,43 @@ export default function Orchestra({
     [apply, energy, releaseAll, buildMode],
   );
 
+  const chooseScene = (sceneId: SceneId) => {
+    releaseAll();
+    apply(changeScene(scoreRef.current, sceneId));
+    setBuilding(false);
+    setProgress(0);
+    setStep(orchestra.playing ? 0 : -1);
+    setNotice(
+      "Scene changed. Your ensemble and chords stay; woven phrases keep their pitches.",
+    );
+  };
+
+  const clearScore = () => {
+    if (
+      !window.confirm(
+        "Reset all notes? This clears the score, live and queued phrases. Your scene and chords stay so you can build again.",
+      )
+    )
+      return;
+    releaseAll();
+    orchestra.stop();
+    orchestra.autoEvolve = false;
+    orchestra.cancelQueuedWeave();
+    orchestra.setSolo(null);
+    setPlaying(false);
+    setEvolving(false);
+    setBuilding(false);
+    setProgress(0);
+    setStep(-1);
+    setCaptured([]);
+    setQueuedLayers([]);
+    setSolo(null);
+    apply(resetNotes(scoreRef.current));
+    setNotice(
+      "All notes reset. Choose instruments on the right and build a new foundation.",
+    );
+  };
+
   const toggleEvolution = useCallback(() => {
     if (!playableScore(scoreRef.current)) {
       setNotice("Build your foundation before starting Auto-evolve.");
@@ -668,10 +708,6 @@ export default function Orchestra({
         </div>
 
         <div className="header-actions">
-          <Link href="/" className="back-home-btn" title="Return to home page">
-            ← Home
-          </Link>
-
           <div className="mode-pill-header">
             {buildMode ? (
               <span className="mode-tag build">
@@ -687,21 +723,84 @@ export default function Orchestra({
             )}
           </div>
 
-          <button
-            className="icon-button help-button"
-            onClick={(e) => {
-              helpTrigger.current = e.currentTarget;
-              setHelp(true);
+          <details
+            className="studio-menu"
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                event.currentTarget.open = false;
+                event.currentTarget.querySelector("summary")?.focus();
+              }
             }}
-            aria-label="How to play"
-            title="Conductor's Guide"
           >
-            <HelpCircle size={20} />
-          </button>
-          <button className="text-button export-button" onClick={exportScore}>
-            <Download size={16} />
-            Export Score
-          </button>
+            <summary>
+              <MoreHorizontal size={20} /> Studio
+            </summary>
+            <div
+              className="studio-menu-content"
+              onClick={(event) => {
+                if ((event.target as HTMLElement).closest("button"))
+                  event.currentTarget
+                    .closest("details")
+                    ?.removeAttribute("open");
+              }}
+            >
+              <div
+                className="sound-mode-switcher"
+                role="group"
+                aria-label="Orchestral sound mode"
+              >
+                <button
+                  className={`mode-btn ${buildMode ? "active" : ""}`}
+                  aria-pressed={buildMode}
+                  onClick={() => toggleBuildMode(true)}
+                >
+                  Build from Nothing
+                </button>
+                <button
+                  className={`mode-btn ${!buildMode ? "active" : ""}`}
+                  aria-pressed={!buildMode}
+                  onClick={() => toggleBuildMode(false)}
+                >
+                  Full Orchestra
+                </button>
+              </div>
+              <button
+                className="text-button"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Start a new movement? This replaces your current notes and phrases.",
+                    )
+                  )
+                    newMovement();
+                }}
+              >
+                <Music2 size={16} /> New movement
+              </button>
+              <button
+                className="text-button help-button"
+                onClick={(e) => {
+                  helpTrigger.current =
+                    e.currentTarget
+                      .closest("details")
+                      ?.querySelector("summary") ?? e.currentTarget;
+                  setHelp(true);
+                }}
+                aria-label="How to play"
+                title="Conductor's Guide"
+              >
+                <HelpCircle size={20} />
+                How to play
+              </button>
+              <button
+                className="text-button export-button"
+                onClick={exportScore}
+              >
+                <Download size={16} />
+                Export Score
+              </button>
+            </div>
+          </details>
         </div>
       </header>
 
@@ -757,47 +856,6 @@ export default function Orchestra({
             <span>{playing ? "Stop" : "Play Orchestra"}</span>
             <kbd>SPACE</kbd>
           </button>
-
-          {/* Build-first studio, with Full Orchestra as a quick-start alternative. */}
-          <div
-            className="sound-mode-switcher"
-            role="group"
-            aria-label="Orchestral sound mode"
-          >
-            <button
-              className={`mode-btn ${buildMode ? "active" : ""}`}
-              onClick={() => toggleBuildMode(true)}
-              aria-pressed={buildMode}
-              title="Start with an empty score and build your own foundation"
-            >
-              <Sparkles size={15} />
-              <span>Build from Nothing</span>
-            </button>
-            <button
-              className={`mode-btn ${!buildMode ? "active" : ""}`}
-              onClick={() => toggleBuildMode(false)}
-              aria-pressed={!buildMode}
-              title="Quick start: all 8 sections are arranged immediately"
-            >
-              <Music2 size={15} />
-              <span>Full Orchestra</span>
-            </button>
-
-            {buildMode && (
-              <div className="buildup-tracker">
-                <span className="stage-name">
-                  {score.construction?.built
-                    ? `${activeInstruments(score).length}/8 sections in the score`
-                    : "Empty score · choose a foundation"}
-                </span>
-                <span className="stage-entering">
-                  {evolving
-                    ? "One new section every 2 bars"
-                    : "Auto-evolve is off"}
-                </span>
-              </div>
-            )}
-          </div>
 
           <div className="tempo">
             <input
@@ -881,11 +939,7 @@ export default function Orchestra({
         </section>
 
         {/* Scene Library: 12 Musical Worlds */}
-        <SceneLibrary
-          selected={score.scene}
-          onChoose={newMovement}
-          onNew={() => newMovement()}
-        />
+        <SceneLibrary selected={score.scene} onChoose={chooseScene} />
 
         {/* Working Studio Workspace */}
         <div className="workspace">
@@ -904,14 +958,22 @@ export default function Orchestra({
                   </span>
                 </h2>
               </div>
-              <span className="bar-readout">
-                <span className={`status-light ${playing ? "live" : ""}`} />
-                {playing
-                  ? `BAR ${Math.floor(step < 0 ? 0 : step / stepsPerBar(score)) + 1} OF ${BARS}`
-                  : !playableScore(score)
-                    ? "EMPTY SCORE · BUILD YOUR FOUNDATION"
-                    : "READY TO PLAY"}
-              </span>
+              <div className="score-actions">
+                <button
+                  className="text-button reset-notes"
+                  onClick={clearScore}
+                >
+                  <RotateCcw size={14} /> Reset all notes
+                </button>
+                <span className="bar-readout">
+                  <span className={`status-light ${playing ? "live" : ""}`} />
+                  {playing
+                    ? `BAR ${Math.floor(step < 0 ? 0 : step / stepsPerBar(score)) + 1} OF ${BARS}`
+                    : !playableScore(score)
+                      ? "EMPTY SCORE · BUILD YOUR FOUNDATION"
+                      : "READY TO PLAY"}
+                </span>
+              </div>
             </div>
 
             <div
