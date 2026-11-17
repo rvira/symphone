@@ -3,7 +3,6 @@ import { Check } from "lucide-react";
 import {
   SCENES,
   SCENE_FAMILIES,
-  sceneFor,
   type SceneFamily,
   type SceneId,
 } from "../lib/score";
@@ -16,7 +15,6 @@ export default function SceneLibrary({
   onChoose: (scene: SceneId) => void;
 }) {
   const [family, setFamily] = useState<SceneFamily>("All scenes");
-  const scene = sceneFor(selected);
   const visible = SCENES.filter(
     (s) => family === "All scenes" || s.family === family,
   );
@@ -61,15 +59,6 @@ export default function SceneLibrary({
             </span>
           </button>
         ))}
-      </div>
-      <div className="scene-program" aria-live="polite" aria-atomic="true">
-        <p>
-          <strong>{scene.name}.</strong> {scene.description}
-        </p>
-        <small>
-          Change the style, keep your ensemble and chords. Woven phrases keep
-          their pitches.
-        </small>
       </div>
     </section>
   );
