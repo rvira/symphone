@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security reporting
+    url: https://github.com/rvira/symphone/blob/main/SECURITY.md
+    about: Read the security policy before disclosing a vulnerability.
